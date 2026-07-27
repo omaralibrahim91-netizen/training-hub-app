@@ -7,33 +7,57 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NPL">
-<meta name="theme-color" content="#C1121F">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23C1121F'/%3E%3Cg fill='%23F2F1EC'%3E%3Crect x='34' y='48' width='9' height='84'/%3E%3Crect x='55' y='48' width='9' height='84'/%3E%3Crect x='76' y='48' width='9' height='84'/%3E%3Crect x='97' y='48' width='9' height='84'/%3E%3Crect x='26' y='118' width='88' height='9' transform='rotate(-32 70 122)'/%3E%3Crect x='128' y='48' width='9' height='84'/%3E%3C/g%3E%3C/svg%3E">
+<meta name="theme-color" content="#17181B" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2A2E34" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%2317181B'/%3E%3Cg fill='%23F2F1EC'%3E%3Crect x='34' y='48' width='9' height='84'/%3E%3Crect x='55' y='48' width='9' height='84'/%3E%3Crect x='76' y='48' width='9' height='84'/%3E%3Crect x='97' y='48' width='9' height='84'/%3E%3Crect x='128' y='48' width='9' height='84'/%3E%3C/g%3E%3Crect x='26' y='118' width='88' height='9' transform='rotate(-32 70 122)' fill='%23C1121F'/%3E%3C/svg%3E">
 <title>NPL — Training Hub</title>
 <style>
 :root{
-  --paper:#E3E2DB; --panel:#F2F1EC; --ink:#17181B; --red:#C1121F;
-  --steel:#274156; --muted:#7C7C72; --line:#C9C7BD;
+  --paper:#E3E2DB; --panel:#F2F1EC; --ink:#17181B;
+  /* red is reserved for state — active, ringing, over the line. The brand is ink. */
+  --red:#C1121F; --good:#2F6B45;
+  --brand:#17181B; --brand-ink:#F2F1EC;
+  --steel:#274156; --muted:#64645B; --line:#C9C7BD;
+  /* chart series, validated for CVD and contrast against --panel */
+  --s1:#C1121F; --s2:#1D6F9C; --s3:#B07C22;
   --disp:"Avenir Next Condensed","HelveticaNeue-CondensedBold","Arial Narrow",system-ui,sans-serif;
   --body:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+/* Dark is chosen, not flipped: every value re-picked and re-validated against
+   the dark surface — 5:1 or better for text, series re-stepped for CVD. */
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#131416; --panel:#1C1E21; --ink:#E8E7E1;
+    --red:#FF4D5E; --good:#6FBF87;
+    /* lifted above the page, not sunk below it, so the angled cut still reads */
+    --brand:#2A2E34; --brand-ink:#E8E7E1;
+    --steel:#6FA0C8; --muted:#9A9A90; --line:#33363B;
+    --s1:#DC5555; --s2:#3F8FC7; --s3:#B88827;
+  }
+  .acc-row input,.field input,.field select{background:#0E0F11;color:var(--ink)}
+  .set[aria-pressed="true"]{color:#131416}
+  .set[aria-pressed="true"] .reps{color:rgba(19,20,22,.8)}
+  .wkbtn[aria-pressed="true"]{color:#0E0F11}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
   padding-bottom:calc(96px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+/* the workout strip is a second fixed bar: without this the last card hides under it */
+body.hasmini{padding-bottom:calc(164px + env(safe-area-inset-bottom))}
 .wrap{max-width:640px;margin:0 auto;padding:0 16px}
 :focus-visible{outline:3px solid var(--steel);outline-offset:2px}
 
-header{background:var(--red);color:var(--panel);padding:calc(16px + env(safe-area-inset-top)) 0 32px;
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 22px),0 100%);margin-bottom:18px}
+header{background:var(--brand);color:var(--brand-ink);padding:calc(14px + env(safe-area-inset-top)) 0 26px;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 20px),0 100%);margin-bottom:16px}
 .eyebrow{font-family:var(--disp);text-transform:uppercase;letter-spacing:.18em;font-size:13px;font-weight:600;opacity:.85;margin:0}
 .hgrid{display:flex;align-items:flex-end;gap:14px;margin-top:2px}
-.hnum{font-family:var(--disp);font-weight:700;font-size:56px;line-height:.82;letter-spacing:-.02em;text-transform:uppercase}
-.hnum small{font-size:19px;letter-spacing:.06em;display:block;font-weight:600;opacity:.8}
-.htitle{font-family:var(--disp);text-transform:uppercase;font-weight:600;font-size:18px;line-height:1.05;padding-bottom:4px;flex:1}
-.backlink{background:none;border:none;color:var(--panel);font-family:var(--disp);text-transform:uppercase;
-  letter-spacing:.14em;font-size:13px;font-weight:600;padding:0 0 6px;cursor:pointer;opacity:.9}
+.hnum{font-family:var(--disp);font-weight:700;font-size:48px;line-height:.84;letter-spacing:-.02em;text-transform:uppercase}
+.hnum small{font-size:18px;letter-spacing:.06em;display:block;font-weight:600;opacity:.8}
+.htitle{font-family:var(--disp);text-transform:uppercase;font-weight:600;font-size:18px;line-height:1.1;padding-bottom:3px;flex:1}
+.backlink{background:none;border:none;color:var(--brand-ink);font-family:var(--disp);text-transform:uppercase;
+  letter-spacing:.14em;font-size:13px;font-weight:600;padding:0 0 6px;cursor:pointer;opacity:.9;min-height:32px}
 
 /* tally */
 .tally{background:var(--panel);border:1px solid var(--line);padding:14px 14px 12px;margin-bottom:18px}
@@ -55,7 +79,7 @@ header{background:var(--red);color:var(--panel);padding:calc(16px + env(safe-are
   border-left:5px solid var(--ink);padding:14px 16px;margin-bottom:9px;cursor:pointer;color:inherit;font:inherit;min-height:64px}
 .prog{position:relative;padding-right:38px}
 .prog .pname{display:block;font-family:var(--disp);text-transform:uppercase;font-size:21px;font-weight:700;letter-spacing:.01em;line-height:1.1}
-.prog .ptag{display:block;margin-top:2px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.02em;line-height:1.3}
+.prog .ptag{display:block;margin-top:2px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em;line-height:1.3}
 .prog .pgo{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:26px;color:var(--red);line-height:1}
 .prog.hot{border-left-color:var(--red)}
 .sechead{font-family:var(--disp);text-transform:uppercase;letter-spacing:.16em;font-size:12.5px;
@@ -66,12 +90,16 @@ header{background:var(--red);color:var(--panel);padding:calc(16px + env(safe-are
 .daybtn{font-family:var(--disp);text-transform:uppercase;font-weight:600;letter-spacing:.05em;font-size:13.5px;
   min-height:50px;background:var(--panel);border:1px solid var(--line);color:var(--ink);cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px}
-.daybtn.named{font-size:11px;letter-spacing:.02em;line-height:1.1;white-space:normal;text-align:center;padding:4px 3px;min-height:56px}
-.daybtn small{font-family:var(--mono);font-size:10px;letter-spacing:0;color:var(--muted);text-transform:none}
+.daybtn.named{font-size:12px;letter-spacing:.02em;line-height:1.1;white-space:normal;text-align:center;padding:4px 3px;min-height:56px}
+.daybtn small{font-family:var(--mono);font-size:12px;letter-spacing:0;color:var(--muted);text-transform:none}
 .daybtn[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
 .daybtn[aria-pressed="true"] small{color:#B9B7AE}
-.wkbtn{font-family:var(--mono);font-size:11.5px;min-height:38px;background:transparent;border:1px solid var(--line);color:var(--muted);cursor:pointer}
+.wkbtn{font-family:var(--mono);font-size:12px;min-height:44px;background:transparent;border:1px solid var(--line);color:var(--muted);cursor:pointer}
 .wkbtn[aria-pressed="true"]{background:var(--steel);border-color:var(--steel);color:#fff}
+.wkbtn:disabled{opacity:.3;cursor:default}
+.wkbtn.step{font-family:var(--disp);font-size:22px;line-height:1;color:var(--ink)}
+.wklab{display:flex;align-items:center;justify-content:center;border:1px solid var(--line);
+  font-family:var(--disp);text-transform:uppercase;letter-spacing:.1em;font-size:13.5px;font-weight:600}
 .weeks{margin-bottom:20px}
 
 /* blocks */
@@ -79,7 +107,7 @@ header{background:var(--red);color:var(--panel);padding:calc(16px + env(safe-are
 .lift-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
   border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:11px}
 .lift-head h2{font-family:var(--disp);text-transform:uppercase;font-size:21px;font-weight:700;margin:0}
-.lift-head span{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-align:right;flex:0 0 auto}
+.lift-head span{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;flex:0 0 auto}
 .blocknote{font-size:13px;color:var(--muted);margin:-6px 0 11px}
 .sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:7px}
 .set{background:var(--panel);border:1px solid var(--line);padding:9px 8px 8px;min-height:78px;cursor:pointer;
@@ -87,15 +115,15 @@ header{background:var(--red);color:var(--panel);padding:calc(16px + env(safe-are
   transition:background .12s ease,border-color .12s ease}
 .set .pct{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.03em;line-height:1.05}
 .set .kg{font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:-.02em}
-.set .reps{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.25}
+.set .reps{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.25}
 .set[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
-.set[aria-pressed="true"] .reps{color:rgba(255,255,255,.78)}
+.set[aria-pressed="true"] .reps{color:rgba(255,255,255,.9)}   /* .78 was 4.2:1 at 10.5px — under AA */
 
 .acc-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
   border-bottom:none;padding:10px 12px;min-height:56px}
 .acc-row:last-of-type{border-bottom:1px solid var(--line)}
 .acc-name{flex:1;font-size:15px;line-height:1.2}
-.acc-name em{display:block;font-family:var(--mono);font-style:normal;font-size:11.5px;color:var(--muted)}
+.acc-name em{display:block;font-family:var(--mono);font-style:normal;font-size:12px;color:var(--muted)}
 .acc-row input{width:78px;font-family:var(--mono);font-size:16px;text-align:right;padding:9px 8px;
   border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:0}
 .acc-row .unit{font-family:var(--mono);font-size:12px;color:var(--muted);width:16px}
@@ -113,7 +141,37 @@ button.red{background:var(--red)}
 p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 .hist{font-family:var(--mono);font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
 .hist div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+/* notes were write-only: a ✎ in the log and no way to read them back */
+.hist div.histnote{display:block;font-family:var(--body);font-size:12.5px;color:var(--ink);
+  opacity:.8;padding:0 0 7px;line-height:1.35}
 .hidden{display:none!important}
+
+/* counter — replaces a grid of identical chips for repetitive work */
+.counter{display:flex;align-items:stretch;gap:8px;background:var(--panel);border:1px solid var(--line);padding:8px}
+.cbtn{flex:0 0 68px;min-height:76px;background:var(--ink);color:var(--paper);border:none;
+  font-family:var(--disp);font-size:30px;font-weight:600;line-height:1;cursor:pointer}
+.cbtn:disabled{background:var(--line);color:var(--muted);cursor:default}
+.cnum{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1px}
+.cnum b{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.05}
+.cnum b span{color:var(--muted);font-weight:400;font-size:19px}
+.cnum em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.25}
+.counter + .bar{margin-top:-1px}
+
+/* chart marks follow the theme instead of baking in hex */
+.cg{stroke:var(--line)}
+.ct{fill:var(--muted);font-family:var(--mono);font-size:11px}
+.cbar{fill:var(--ink)}
+.cavg{stroke:var(--red)}
+.cring{stroke:var(--panel)}
+
+/* coach status is a state, so it gets the state colour + its own word */
+.tally.st-alert{border-color:var(--red)}
+.tally.st-alert .bar i{background:var(--red)}
+.tally.st-alert b{color:var(--red)}
+.tally.st-good .bar i{background:var(--good)}
+.tally.st-good b{color:var(--good)}
+.tally.st-neutral .bar i{background:var(--ink)}
+.tally.st-idle .bar i{background:var(--muted)}
 
 /* session notes */
 #sessNote{width:100%;min-height:64px;background:var(--panel);border:1px solid var(--line);padding:10px 12px;
@@ -159,6 +217,16 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 .timerbar .lab{font-family:var(--disp);text-transform:uppercase;letter-spacing:.14em;font-size:12px;opacity:.8;display:block}
 .timerbar button{min-height:44px;padding:0 14px;background:transparent;border:1px solid rgba(242,241,236,.5);
   color:var(--panel);font-family:var(--disp);text-transform:uppercase;letter-spacing:.1em;font-size:13px;font-weight:600;cursor:pointer}
+.wkmini{position:fixed;left:0;right:0;bottom:0;z-index:35;background:var(--panel);border-top:2px solid var(--ink);
+  display:flex;align-items:stretch;gap:8px;padding:8px 16px calc(8px + env(safe-area-inset-bottom))}
+.wkmini.stacked{padding-bottom:8px}   /* bottom offset is measured, not guessed — see renderClock */
+.wkmini .mtap{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  background:none;border:none;color:var(--ink);cursor:pointer;padding:0;min-height:44px;text-align:left}
+.wkmini .mlab{font-family:var(--disp);text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--muted)}
+.wkmini .mt{font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:-.02em}
+.wkmini.paused .mt{color:var(--muted)}
+.wkmini .mbtn{min-height:44px;padding:0 16px;background:var(--ink);color:var(--paper);border:none;
+  font-family:var(--disp);text-transform:uppercase;letter-spacing:.08em;font-size:13px;font-weight:600;cursor:pointer}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));
   background:var(--ink);color:var(--panel);padding:11px 18px;font-family:var(--mono);font-size:13px;opacity:0;
   pointer-events:none;transition:opacity .2s ease;z-index:70;max-width:90vw;text-align:center}
@@ -173,7 +241,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
     <button class="backlink hidden" id="backTop">‹ Library</button>
     <p class="eyebrow" id="eyebrow">Training hub</p>
     <div class="hgrid">
-      <div class="hnum"><span id="hDay">—</span><small id="hWeek"></small></div>
+      <div class="hnum hidden" id="hNum"><span id="hDay">—</span><small id="hWeek"></small></div>
       <div class="htitle" id="hTitle">Set your loads</div>
     </div>
   </div>
@@ -224,6 +292,13 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
     <div class="bar"><i id="swBar" style="width:0%"></i></div>
     <p class="tally-note">Every swing you tick anywhere in the app counts. <b id="swSess">0 sessions</b> of the Dan John challenge logged.</p>
   </div>
+  <div class="tally hidden" id="upNext">
+    <div class="tally-head"><b>Pick up where you left off</b></div>
+    <div class="acc-row" style="border:none;padding:0;background:none">
+      <div class="acc-name"><span id="upName"></span><em id="upLine"></em></div>
+      <button class="wkbtn" id="upOpen" type="button" style="min-height:44px;min-width:76px;flex:0 0 auto">Open</button>
+    </div>
+  </div>
   <div class="tally hidden" id="bkNote"><p class="tally-note" style="margin:0" id="bkMsg"></p></div>
   <p class="sechead">Custom</p>
   <div id="libX"></div>
@@ -237,6 +312,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   <div id="libC"></div>
   <p class="sechead">Running</p>
   <div id="libE"></div>
+  <button class="big ghost" id="coachBtn">Coach — load &amp; readiness</button>
   <button class="big ghost" id="progressBtn">Progress &amp; charts</button>
   <button class="big ghost" id="timerOnly">Open rest timer</button>
   <button class="big ghost" id="settingsBtn">Loads &amp; data</button>
@@ -266,6 +342,27 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
     <p class="blocknote" id="fbLead">How did that sit? The next sessions scale from your answer.</p>
     <div class="presets fb3" id="fbBtns"></div>
   </div>
+</section>
+
+<!-- ===== COACH ===== -->
+<section id="coach" class="hidden">
+  <div class="tally" id="coBox">
+    <div class="tally-head"><b id="coStatus">Building your baseline</b><span id="coRatio"></span></div>
+    <div class="bar"><i id="coGauge" style="width:0%"></i></div>
+    <p class="tally-note" id="coLead"></p>
+  </div>
+  <div class="card"><h3>What I'd change</h3><div id="coAdvice"></div></div>
+  <div class="card"><h3>Next up</h3><div id="coNext"></div></div>
+  <div class="card chartbox"><h3>Daily load — 28 days</h3><div id="coChart"></div></div>
+  <div class="card"><h3>Numbers</h3><div class="hist" id="coNums"></div></div>
+  <div class="card">
+    <h3>Auto-pilot</h3>
+    <p class="lede">Left to advise, the coach only suggests. Set to apply and it makes at most two changes a day on its own, inside the same 80–115% range as your manual feedback. It never edits your logs, and “Reset all scaling” in Loads &amp; data undoes everything.</p>
+    <div class="field"><label for="coAuto">Manage my load</label>
+      <select id="coAuto"><option value="0">Only advise</option><option value="1">Advise and apply</option></select></div>
+    <div class="hist" id="coLog"></div>
+  </div>
+  <button class="big" id="backBtn3">Back to library</button>
 </section>
 
 <!-- ===== PROGRESS ===== -->
@@ -370,6 +467,11 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   <button class="big ghost" id="shClose">Close</button>
 </div></div>
 
+<!-- the workout clock keeps running when you leave the session; this is how you see and reach it -->
+<div class="wkmini hidden" id="wkMini">
+  <button class="mtap" id="wkBack" type="button"><span class="mlab">Workout running</span><span class="mt" id="wkMiniT">0:00</span></button>
+  <button class="mbtn" id="wkMiniPause" type="button">Pause</button>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -399,9 +501,57 @@ let S = null, PROG = null, BUILT = null;
 const blank = () => ({
   v:SCHEMA, setup:false, oneRM:{squat:0,bench:0,dl:0}, kb:24, bag:12, row2k:450, pmax:8, dmax:10, run5k:1800, adj:{}, awake:true, ring:false, ringName:"Rest Timer",
   target:140, inc:2.5, cycle:1, pos:{}, log:{}, history:[], rmLog:[], start:{}, lastExport:"",
-  gh:{repo:"", token:"", auto:false}, mixSel:[], wk:null
+  gh:{repo:"", token:"", auto:false}, mixSel:[], wk:null, coach:{auto:false, lastRun:"", log:[]}
 });
-const posOf = id => (S.pos[id] = S.pos[id] || {w:1,d:1});
+/* Anything that arrives from storage or a restored backup is untrusted: one
+   null field used to take the whole app down with it. Repair, never trust. */
+function sane(o){
+  const b = blank();
+  if(!o || typeof o !== "object") return b;
+  const num = (v,d) => { const n = parseFloat(v); return isFinite(n) && n >= 0 ? n : d; };
+  const pos = (v,d) => num(v,d) || d;
+  o.oneRM = (o.oneRM && typeof o.oneRM === "object") ? o.oneRM : {};
+  ["squat","bench","dl"].forEach(k => { o.oneRM[k] = num(o.oneRM[k], 0); });
+  o.kb = num(o.kb, 24); o.bag = num(o.bag, 12);
+  o.row2k = pos(o.row2k, 450); o.run5k = pos(o.run5k, 1800);
+  o.pmax = Math.round(pos(o.pmax, 8)); o.dmax = Math.round(pos(o.dmax, 10));
+  o.target = Math.round(pos(o.target, 140)); o.inc = pos(o.inc, 2.5);
+  o.cycle = Math.max(1, Math.round(pos(o.cycle, 1)));
+  ["log","pos","adj","gh","coach","start"].forEach(k => {
+    if(!o[k] || typeof o[k] !== "object" || Array.isArray(o[k])) o[k] = b[k];
+  });
+  ["history","rmLog","mixSel"].forEach(k => { if(!Array.isArray(o[k])) o[k] = []; });
+  /* entries too, not just the arrays: one null row used to throw from the
+     calendar and the settings log, which render them without guarding */
+  o.history = o.history.filter(x => x && typeof x === "object");
+  o.rmLog = o.rmLog.filter(x => x && typeof x === "object");
+  o.mixSel = o.mixSel.filter(x => typeof x === "string" && progById(x));
+  o.coach.log = Array.isArray(o.coach.log) ? o.coach.log.filter(x => x && typeof x === "object") : [];
+  o.gh.repo = String(o.gh.repo || ""); o.gh.token = String(o.gh.token || "");
+  Object.keys(o.adj).forEach(k => {
+    const v = parseFloat(o.adj[k]);
+    if(!isFinite(v) || v <= 0) delete o.adj[k]; else o.adj[k] = Math.min(1.15, Math.max(0.80, v));
+  });
+  Object.keys(o.log).forEach(k => {
+    const r = o.log[k];
+    if(!r || typeof r !== "object"){ delete o.log[k]; return; }
+    if(!r.sets || typeof r.sets !== "object") r.sets = {};
+    if(!r.acc || typeof r.acc !== "object") r.acc = {};
+    if(r.reps && typeof r.reps !== "object") delete r.reps;
+    if(r.dur != null) r.dur = num(r.dur, 0);
+    if(r.dsh != null) r.dsh = Math.max(1, Math.round(num(r.dsh, 1)));
+  });
+  if(o.wk && !(typeof o.wk === "object" && isFinite(+o.wk.start))) o.wk = null;
+  return o;
+}
+/* clamped: a stored position outside a program's range used to throw on every open */
+const posOf = id => {
+  const p = progById(id), o = S.pos[id] = S.pos[id] || {w:1,d:1};
+  const W = p ? p.weeks : 1, D = p ? p.days : 1;
+  o.w = Math.min(W, Math.max(1, Math.round(+o.w) || 1));
+  o.d = Math.min(D, Math.max(1, Math.round(+o.d) || 1));
+  return o;
+};
 const slotKey = (id,w,d) => id + "|" + (id === "sheiko" ? "c" + S.cycle + "|" : "") + w + "|" + d;
 function rec(id,w,d){
   const k = slotKey(id,w,d);
@@ -471,8 +621,10 @@ function scaleNote(id){
 /* ============ UTIL ============ */
 const round = kg => { const i = S.inc || 2.5; return Math.round(kg / i) * i; };
 const fmt = n => (Math.round(n*100)/100).toString();
-const mmss = s => { s = Math.max(0, Math.round(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
-const hhmmss = s => { s = Math.max(0, Math.round(s));
+/* never render NaN at the user: a corrupt stored time reads as 0:00, not garbage */
+const secsOf = s => { const n = Math.round(+s); return isFinite(n) && n > 0 ? n : 0; };
+const mmss = s => { s = secsOf(s); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+const hhmmss = s => { s = secsOf(s);
   const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), x = s%60;
   return (h ? h + ":" + String(m).padStart(2,"0") : String(m)) + ":" + String(x).padStart(2,"0"); };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -505,10 +657,13 @@ function kgOf(s){
 function plates(total){
   if(!(total > 0)) return "";
   const side = (total - 20) / 2;
-  if(side <= 0) return "Empty bar (20 kg)";
+  if(Math.abs(side) < 0.01) return "Empty bar (20 kg)";
+  if(side < 0) return "Lighter than the bar";
   let rem = side; const out = [];
   [25,20,15,10,5,2.5,1.25].forEach(p => { while(rem >= p - 1e-9){ out.push(p); rem -= p; } });
-  return "Per side: " + out.join(" + ") + (rem > 0.01 ? " (+" + fmt(rem) + " unloadable)" : "");
+  const short = rem > 0.01 ? fmt(rem) + " kg a side won't load" : "";
+  if(!out.length) return "Bar only — " + short;
+  return "Per side: " + out.join(" + ") + (short ? " (" + short + ")" : "");
 }
 function toast(m){ const t = el("toast"); t.textContent = m; t.classList.add("show");
   clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 1900); }
@@ -576,7 +731,7 @@ async function ghRestore(){
     for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     const d = JSON.parse(new TextDecoder().decode(bytes));
     if(!d.oneRM) throw new Error("that file is not a backup");
-    S = Object.assign(blank(), d);
+    S = sane(Object.assign(blank(), d));
     S.v = d.v || 1;
     migrate();
     S.gh = g;                      /* backups carry no token — keep this device's */
@@ -635,7 +790,7 @@ function startTimer(sec, label){
   el("tLab").textContent = label || "Rest";
   el("timerBar").classList.remove("hidden","ring");
   clearInterval(TM.iv);
-  TM.iv = setInterval(tick, 200); tick();
+  TM.iv = setInterval(tick, 200); tick(); renderClock();
 }
 function tick(){
   const left = (TM.end - Date.now())/1000;
@@ -646,10 +801,10 @@ function tick(){
     el("tLeft").textContent = "0:00"; el("tLab").textContent = "Go";
     beep(); if(navigator.vibrate) navigator.vibrate([200,80,200]);
     keepAlive(false); wake(false);
-    setTimeout(()=>{ if(!TM.iv) el("timerBar").classList.add("hidden"); }, 6000);
+    setTimeout(()=>{ if(!TM.iv){ el("timerBar").classList.add("hidden"); renderClock(); } }, 6000);
   }
 }
-el("tStop").onclick = () => { clearInterval(TM.iv); TM.iv = null; keepAlive(false); wake(false); el("timerBar").classList.add("hidden"); };
+el("tStop").onclick = () => { clearInterval(TM.iv); TM.iv = null; keepAlive(false); wake(false); el("timerBar").classList.add("hidden"); renderClock(); };
 /* the countdown is a timestamp, not a tick count — it is always correct on return */
 document.addEventListener("visibilitychange", () => {
   if(document.visibilityState === "visible" && TM.iv){ wake(true); tick(); }
@@ -667,15 +822,31 @@ function wkElapsed(){
   return Math.max(0, (w.acc || 0) + (w.run ? (Date.now() - w.start)/1000 : 0));
 }
 function renderClock(){
-  const w = S.wk;
-  el("wTime").textContent = hhmmss(wkElapsed());
+  const w = S.wk, t = hhmmss(wkElapsed());
+  el("wTime").textContent = t;
   el("wStart").classList.toggle("hidden", !!w);
   el("wPause").classList.toggle("hidden", !w);
   el("wFinish").classList.toggle("hidden", !w);
   el("wPause").textContent = w && !w.run ? "Resume" : "Pause";
   el("wClock").classList.toggle("paused", !!(w && !w.run));
+  /* outside the session the clock used to be invisible and unstoppable */
+  const away = el("app").classList.contains("hidden");
+  const mini = el("wkMini"), onScreen = !!(w && away);
+  mini.classList.toggle("hidden", !onScreen);
+  document.body.classList.toggle("hasmini", onScreen);
+  mini.classList.toggle("paused", !!(w && !w.run));
+  /* the rest bar's height varies with the safe area, so measure it rather than
+     assume — a fixed guess left the two bars overlapping by 17px */
+  const barUp = !el("timerBar").classList.contains("hidden");
+  mini.classList.toggle("stacked", barUp);
+  mini.style.bottom = barUp ? el("timerBar").offsetHeight + "px" : "";
+  el("wkMiniT").textContent = t;
+  el("wkMiniPause").textContent = w && !w.run ? "Resume" : "Pause";
   clearInterval(WCIV); WCIV = null;
-  if(w && w.run) WCIV = setInterval(() => { el("wTime").textContent = hhmmss(wkElapsed()); }, 1000);
+  if(w && w.run) WCIV = setInterval(() => {
+    const now = hhmmss(wkElapsed());
+    el("wTime").textContent = now; el("wkMiniT").textContent = now;
+  }, 1000);
 }
 /* stops the clock, stamps the duration and logs the session(s) as complete */
 function finishWorkout(secs){
@@ -685,11 +856,17 @@ function finishWorkout(secs){
     if(!sel.length){ toast("Workout " + hhmmss(secs) + " — nothing selected to log"); save(); return; }
     let n = 0;
     sel.forEach(id => {
-      const p = progById(id), ppos = posOf(id), rr = rec(id, ppos.w, ppos.d);
-      rr.dur = secs;
-      if(rr.done) return;
+      const p = progById(id), ppos = posOf(id), rr = rec(id, ppos.w, ppos.d), kk = slotKey(id, ppos.w, ppos.d);
+      /* one clock covers them all: dsh lets the load model split it, not multiply it */
+      rr.dur = secs; rr.dsh = sel.length;
+      if(rr.done){
+        /* already logged from its own screen — still give its history line the time */
+        const h = S.history.find(x => x.k === kk);
+        if(h) h.t = secs;
+        return;
+      }
       rr.done = true; rr.d0 = rr.d0 || todayISO(); n++;
-      S.history.unshift({d:todayISO(), p:p.name, w:ppos.w, day:ppos.d, k:slotKey(id, ppos.w, ppos.d), t:secs});
+      S.history.unshift({d:todayISO(), p:p.name, w:ppos.w, day:ppos.d, k:kk, t:secs});
     });
     S.history = S.history.slice(0,80);
     toast("Workout " + hhmmss(secs) + (n ? " — logged " + n + (n === 1 ? " session" : " sessions") : ""));
@@ -711,15 +888,23 @@ function finishWorkout(secs){
   if(ghCfg().auto) ghBackup(true);
 }
 el("wStart").onclick = () => { S.wk = {start:Date.now(), acc:0, run:true}; save(); renderClock(); };
-el("wPause").onclick = () => {
+function togglePause(){
   const w = S.wk; if(!w) return;
   if(w.run){ w.acc = wkElapsed(); w.run = false; }
   else { w.start = Date.now(); w.run = true; }
   save(); renderClock();
-};
+}
+el("wPause").onclick = togglePause;
+el("wkMiniPause").onclick = togglePause;
+/* tapping the strip takes you back to the session, where Finish can name what it logs */
+el("wkBack").onclick = () => { if(PROG){ renderSession(); show("app"); } };
 el("wFinish").onclick = () => {
   const secs = Math.round(wkElapsed());
-  if(!confirm("Finish workout at " + hhmmss(secs) + "? The session gets logged as complete.")) return;
+  /* the clock is global but Finish logs what you are looking at — say so */
+  const what = !PROG ? "Nothing is open, so nothing will be logged."
+    : PROG.mixer ? ((S.mixSel || []).filter(id => progById(id)).map(id => progById(id).name).join(", ") || "Nothing selected") + " get logged as complete."
+    : PROG.name + " gets logged as complete.";
+  if(!confirm("Finish workout at " + hhmmss(secs) + "?\n\n" + what)) return;
   S.wk = null;
   renderClock();
   finishWorkout(secs);
@@ -1071,6 +1256,16 @@ const PROGS = [
   dayName:d => ["Easy","Work","Recov","Long","Cross"][d-1]}
 ];
 const progById = id => PROGS.find(p => p.id === id);
+/* Every builder is total. A week or day outside a program's range — from a
+   hand-edited backup, or from a future version shortening a plan — is clamped
+   here rather than thrown from inside a lookup table, which used to leave that
+   program permanently unopenable. */
+PROGS.forEach(p => {
+  const raw = p.build;
+  p.build = (w,d) => raw(
+    Math.min(p.weeks, Math.max(1, Math.round(+w) || 1)),
+    Math.min(p.days,  Math.max(1, Math.round(+d) || 1)));
+});
 
 /* ============ COUNTERS ============ */
 function countAll(){
@@ -1079,7 +1274,7 @@ function countAll(){
     const id = k.split("|")[0], r = S.log[k], p = progById(id);
     if(!p) return;
     if(r.reps){
-      Object.keys(r.reps).forEach(x => { if(r.reps[x].c === "sw") sw += r.reps[x].n || 0; });
+      Object.keys(r.reps).forEach(x => { const f = r.reps[x]; if(f && f.c === "sw") sw += (+f.n) || 0; });
     } else {
       /* pre-v6 entries have no frozen reps — rebuild them once, best effort */
       const parts = k.split("|"), w = +parts[parts.length-2], d = +parts[parts.length-1];
@@ -1098,7 +1293,7 @@ function weekNPL(w){
     const r = S.log[slotKey("sheiko",w,d)];
     if(!r) continue;
     if(r.reps){
-      Object.keys(r.reps).forEach(x => { if(r.reps[x].c === "npl") n += r.reps[x].n || 0; });
+      Object.keys(r.reps).forEach(x => { const f = r.reps[x]; if(f && f.c === "npl") n += (+f.n) || 0; });
       continue;
     }
     const built = sheikoSession(w,d);
@@ -1111,7 +1306,7 @@ function weekNPL(w){
 function dayDone(p,w,d){
   const r = S.log[slotKey(p.id,w,d)];
   if(!r) return [0,0];
-  const built = p.build(w,d);
+  let built; try{ built = p.build(w,d); }catch(e){ return [0,0]; }
   let done = 0, tot = 0;
   built.blocks.forEach((b,bi) => b.items.forEach((it,ii) => {
     if(b.kind !== "acc"){ tot++; if(r.sets[bi + "-" + ii]) done++; }
@@ -1119,20 +1314,270 @@ function dayDone(p,w,d){
   return [done,tot];
 }
 
+/* ============ COACH ============
+   A load model over what actually got ticked, and the adjustments it implies.
+   Session load follows Foster's duration × intensity: the workout clock gives
+   real minutes, and where it was not used the app falls back to the median
+   duration LEARNED from your own past sessions of that program, scaled by how
+   much of the session you completed. Acute (7 d) against chronic (28 d mean)
+   is the familiar acute:chronic ratio — a rule of thumb for spotting spikes,
+   not a diagnosis, and it says nothing about sleep, work stress or a rota. */
+const COACH_INT = {sheiko:7, kimura:6, swing:8, ss:5, rop:7, pull:6, hero:9, bag:8, row:7, run:5};
+const ROW_INT = {UT2:4, UT1:5, AT:7, TR:9, AN:9, "2k":10};
+/* Percentage work tells you its own intensity. A deload week at 60% counted
+   the same as a heavy week at 85% while this was a constant; now the ticked
+   sets decide, so an easy week finally reads as an easy week. */
+function sheikoIntensity(w,d,r){
+  let built; try{ built = progById("sheiko").build(w,d); }catch(e){ return COACH_INT.sheiko; }
+  let sum = 0, n = 0;
+  built.blocks.forEach((b,bi) => b.items.forEach((it,ii) => {
+    if(it.cnt !== "npl" || !r.sets[bi + "-" + ii]) return;
+    const m = String(it.label).match(/^(\d+)%$/);
+    if(m){ sum += +m[1]; n++; }
+  }));
+  if(!n) return COACH_INT.sheiko;
+  return Math.max(3, Math.min(9, 3 + (sum/n - 50)/35 * 6));   /* 50% → 3, 85% → 9 */
+}
+function dayIntensity(id,w,d,r){
+  if(id === "run") return [4,8,3,6,3][d-1] || 5;
+  if(id === "row"){ const s = (ROW[((w-1)%6)+1] || {})[d]; return ROW_INT[s && s.z] || 7; }
+  if(id === "sheiko" && r && r.sets) return sheikoIntensity(w,d,r);
+  return COACH_INT[id] || 6;
+}
+function estMinutes(built){
+  let sec = 0;
+  built.blocks.forEach(b => {
+    if(b.kind === "acc"){ sec += b.items.length * 150; return; }
+    b.items.forEach(it => { sec += 40 + (it.rest || 40); });
+  });
+  return sec/60;
+}
+/* the learned part: what these sessions really take YOU, not the estimate */
+function learnedMinutes(id){
+  const a = [];
+  Object.keys(S.log).forEach(k => {
+    if(k.split("|")[0] !== id) return;
+    const r = S.log[k];
+    if(r.dur > 0) a.push(r.dur/(r.dsh || 1)/60);
+  });
+  if(a.length < 2) return 0;
+  a.sort((x,y) => x - y);
+  return a[Math.floor(a.length/2)];
+}
+function doneFrac(p,w,d,r){
+  let built; try{ built = p.build(w,d); }catch(e){ return [0,0,0]; }
+  let done = 0, tot = 0;
+  built.blocks.forEach((b,bi) => { if(b.kind === "acc") return;
+    b.items.forEach((it,ii) => { tot++; if(r.sets[bi + "-" + ii]) done++; }); });
+  return [done, tot, tot ? done/tot : (r.done ? 1 : 0)];
+}
+function sessionLoad(id,w,d,r){
+  const p = progById(id); if(!p || p.mixer) return 0;
+  /* a clocked session needs no rebuild to price it — real minutes are enough */
+  if(r.dur > 0)
+    return Math.round(Math.min(300, r.dur/(r.dsh || 1)/60) * dayIntensity(id,w,d,r));
+  const f = doneFrac(p,w,d,r)[2];
+  if(!f && !r.done) return 0;
+  let built; try{ built = p.build(w,d); }catch(e){ return 0; }
+  const mins = (learnedMinutes(id) || estMinutes(built)) * (r.done ? Math.max(f, 0.9) : f);
+  return Math.round(mins * dayIntensity(id,w,d,r));
+}
+function loadStats(){
+  const per = {}, byProg = {};
+  Object.keys(S.log).forEach(k => {
+    const r = S.log[k]; if(!r.d0) return;
+    const parts = k.split("|"), id = parts[0];
+    const L = sessionLoad(id, +parts[parts.length-2], +parts[parts.length-1], r);
+    if(!L) return;
+    per[r.d0] = (per[r.d0] || 0) + L;
+    const age = Math.floor((Date.now() - new Date(r.d0 + "T12:00").getTime())/864e5);
+    if(age >= 0 && age < 7) byProg[id] = (byProg[id] || 0) + L;
+  });
+  const today = new Date();
+  const at = i => { const dt = new Date(today); dt.setDate(today.getDate() - i); return per[isoOf(dt)] || 0; };
+  const week = [], month = [];
+  for(let i=0;i<7;i++) week.push(at(i));
+  for(let i=0;i<28;i++) month.push(at(i));
+  const acute = week.reduce((a,b) => a+b, 0);
+  const chronic = month.reduce((a,b) => a+b, 0)/4;
+  const mean = acute/7;
+  const sd = Math.sqrt(week.reduce((a,b) => a + (b-mean)*(b-mean), 0)/7);
+  const days = Object.keys(per).sort();
+  return {per:per, at:at, week:week, month:month, acute:acute, chronic:chronic,
+    acwr: chronic > 0 ? acute/chronic : 0,
+    monotony: sd > 0.01 ? mean/sd : 0,
+    rest7: week.filter(x => x === 0).length,
+    byProg:byProg, daysLogged:days.length,
+    span: days.length ? Math.floor((Date.now() - new Date(days[0] + "T12:00").getTime())/864e5) + 1 : 0};
+}
+function progCompletion(id,n){
+  const recs = [];
+  Object.keys(S.log).forEach(k => {
+    if(k.split("|")[0] !== id) return;
+    const r = S.log[k]; if(!r.d0) return;
+    const parts = k.split("|");
+    recs.push({d:r.d0, w:+parts[parts.length-2], dd:+parts[parts.length-1], r:r});
+  });
+  if(!recs.length) return null;
+  recs.sort((a,b) => a.d < b.d ? 1 : -1);
+  const use = recs.slice(0, n || 3), p = progById(id);
+  let s = 0;
+  use.forEach(x => { s += doneFrac(p, x.w, x.dd, x.r)[2]; });
+  return {frac:s/use.length, n:use.length, last:use[0].d,
+    age: Math.floor((Date.now() - new Date(use[0].d + "T12:00").getTime())/864e5)};
+}
+/* best honest single-set estimate from what you actually logged */
+function bestE1RM(lift,days){
+  let best = 0, when = "";
+  Object.keys(S.log).forEach(k => {
+    const r = S.log[k]; if(!r.reps || !r.d0) return;
+    if((Date.now() - new Date(r.d0 + "T12:00").getTime())/864e5 > (days || 45)) return;
+    Object.keys(r.reps).forEach(id => {
+      const f = r.reps[id];
+      if(f && f.l === lift && f.w > 0 && f.n > 0 && f.n <= 10){
+        const e = epley(f.w, f.n);
+        if(e > best){ best = e; when = r.d0; }
+      }
+    });
+  });
+  return {v:best, d:when};
+}
+/* The one answer to "what now": the live plan left alone longest, stepped
+   down to something light when the week is already heavy. */
+function nextUp(st){
+  const cand = PROGS.filter(p => !p.mixer).map(p => ({p:p, c:progCompletion(p.id,1)}))
+    .filter(x => x.c && x.c.age <= 21).sort((a,b) => b.c.age - a.c.age);
+  if(!cand.length) return null;
+  const light = st && st.acwr > 1.5
+    ? cand.filter(x => dayIntensity(x.p.id, posOf(x.p.id).w, posOf(x.p.id).d) <= 6)[0] : null;
+  const pick = light || cand[0];
+  return {p:pick.p, pos:posOf(pick.p.id), age:pick.c.age, light:!!light, spike:!!(st && st.acwr > 1.5)};
+}
+function nextUpLine(n){
+  return (n.p.weeks > 1 ? "Week " + n.pos.w + " · " : "") + (n.p.days > 1 ? "Day " + n.pos.d + " · " : "") +
+    "last done " + (n.age === 0 ? "today" : n.age === 1 ? "yesterday" : n.age + " days ago");
+}
+function coachNote(msg){
+  const c = S.coach = S.coach || {auto:false, lastRun:"", log:[]};
+  c.log = c.log || [];
+  c.log.unshift({d:todayISO(), m:msg});
+  c.log = c.log.slice(0,30);
+}
+/* One move per program per day, whoever asks — a manual tap and the auto-pilot
+   must never stack on the same program. Rounded, or float error accumulates. */
+function adjustedToday(id){
+  const c = S.coach || {};
+  return !!(c.today && c.today.d === todayISO() && c.today.ids && c.today.ids[id]);
+}
+function adjBy(id,delta,force){
+  if(!force && adjustedToday(id)) return 0;
+  const p = progById(id), next = Math.round(Math.max(0.80, Math.min(1.15, A(id) + delta)) * 1000)/1000;
+  if(Math.abs(next - A(id)) < 0.001) return 0;
+  S.adj[id] = next;
+  const c = S.coach = S.coach || {auto:false, lastRun:"", log:[]};
+  if(!c.today || c.today.d !== todayISO()) c.today = {d:todayISO(), ids:{}};
+  c.today.ids[id] = 1;
+  coachNote((delta < 0 ? "Scaled " : "Nudged ") + (p ? p.name : id) + " to " + Math.round(next*100) + "%");
+  return next;
+}
+/* move the program carrying most of this week's load — that's the lever */
+function scaleTop(st,delta){
+  const ids = Object.keys(st.byProg).sort((a,b) => st.byProg[b] - st.byProg[a]);
+  return ids.length ? adjBy(ids[0], delta) : 0;
+}
+function buildAdvice(st){
+  const out = [];
+  const ready = st.span >= 10 && st.chronic > 0;
+  if(ready && st.acwr > 1.5)
+    out.push({t:"Ease off this week", d:"The last 7 days sit at " + Math.round(st.acwr*100) + "% of your 28-day average. Jumps this size are where niggles start — hold the volume for a week and let it catch up.",
+      act:{label:"−5%", fn:() => scaleTop(st,-0.05)}});
+  else if(ready && st.acwr > 1.3)
+    out.push({t:"Pushing hard", d:"You're at " + Math.round(st.acwr*100) + "% of your usual load. Fine for one week; don't stack a second on top."});
+  else if(ready && st.acwr < 0.75 && st.acute > 0)
+    out.push({t:"Room to add", d:"At " + Math.round(st.acwr*100) + "% of your usual load, you can take a step up safely.",
+      act:{label:"+2.5%", fn:() => scaleTop(st,0.025)}});
+  if(st.acute > 0 && st.monotony > 2 && st.rest7 <= 1)
+    out.push({t:"Every day looks the same", d:"Monotony " + st.monotony.toFixed(1) + " with " + (st.rest7 ? "one day off" : "no day off") + ". The same total is easier to absorb with a genuinely easy day in it — take one."});
+  PROGS.forEach(p => {
+    if(p.mixer) return;
+    const c = progCompletion(p.id, 3);
+    if(!c || c.n < 2 || c.age > 21) return;
+    if(c.frac < 0.75)
+      out.push({t:p.name + " runs long", d:"You finish " + Math.round(c.frac*100) + "% of the prescribed sets across your last " + c.n + " sessions. Scaling it back means finishing what's on the page.",
+        act:{label:"−5%", fn:() => adjBy(p.id,-0.05)}});
+    else if(c.frac > 0.99 && c.n >= 3 && A(p.id) < 1.15 && st.acwr < 1.3)
+      out.push({t:p.name + " is fully cleared", d:"Three sessions finished to the last set. That's the signal to add a little.",
+        act:{label:"+2.5%", fn:() => adjBy(p.id,0.025)}});
+  });
+  [["squat","Squat"],["bench","Bench"],["dl","Deadlift"]].forEach(l => {
+    const b = bestE1RM(l[0], 45), cur = S.oneRM[l[0]] || 0;
+    if(b.v > 0 && cur > 0 && b.v >= cur + 2.5)
+      out.push({t:l[1] + " 1RM looks low", d:"A set you logged on " + b.d + " estimates " + b.v + " kg against the " + cur + " kg on file — every Sheiko percentage is being calculated light.",
+        act:{label:"Set " + b.v, fn:() => { S.oneRM[l[0]] = b.v; logRM(); coachNote(l[1] + " 1RM set to " + b.v + " kg"); }}});
+  });
+  const active = PROGS.filter(p => !p.mixer).map(p => ({p:p, c:progCompletion(p.id,1)}))
+    .filter(x => x.c && x.c.age >= 14 && x.c.age <= 60);
+  if(active.length)
+    out.push({t:"Untouched for a while", d:active.map(x => x.p.name + " (" + x.c.age + " d)").join(", ") + ". Either come back to it or drop it — a plan you're not running isn't a plan."});
+  if(!st.daysLogged)
+    out.push({t:"Nothing logged yet", d:"Tick your sets and use Start workout, and this page fills itself in. Ten days of training gives the model its baseline."});
+  else if(st.span < 10)
+    out.push({t:"Still learning you", d:"Day " + st.span + " of the 10 the model needs before it starts judging your load. Numbers below are live already."});
+  return out;
+}
+function coachAuto(){
+  const c = S.coach = S.coach || {auto:false, lastRun:"", log:[]};
+  if(!c.auto || c.lastRun === todayISO()) return;
+  const st = loadStats();
+  if(st.span < 10 || st.chronic <= 0) return;
+  c.lastRun = todayISO();
+  let n = 0;
+  const top = Object.keys(st.byProg).sort((a,b) => st.byProg[b] - st.byProg[a])[0];
+  if(top && st.acwr > 1.5) n += adjBy(top,-0.05) ? 1 : 0;
+  else if(top && st.acwr < 0.75 && st.acute > 0) n += adjBy(top,0.025) ? 1 : 0;
+  PROGS.some(p => {
+    if(n >= 2) return true;
+    if(p.mixer) return false;
+    const cc = progCompletion(p.id,3);
+    if(cc && cc.n >= 2 && cc.age <= 21 && cc.frac < 0.75 && adjBy(p.id,-0.05)) n++;
+    return false;
+  });
+  if(n) toast("Coach adjusted " + n + (n === 1 ? " program" : " programs"));
+  save();
+}
+
+/* A block of identical items is a count, not a list. Thirty-two "1 km" chips
+   ask you to find your place in a grid of clones; one counter does not. */
+function repetitive(b){
+  if(b.kind === "acc" || b.items.length < 6) return null;
+  const f = b.items[0];
+  const alike = b.items.every(it => it.sub === f.sub && (it.reps||0) === (f.reps||0) && (it.rest||0) === (f.rest||0));
+  if(!alike) return null;
+  if(b.items.every(it => it.label === f.label)) return {unit:f.label, item:f};
+  /* "Round 1…20", "Min 1…30" — a numbering, which is also just a count */
+  const m = String(f.label).match(/^(.+?)\s+1$/);
+  if(!m) return null;
+  const pre = m[1];
+  return b.items.every((it,i) => it.label === pre + " " + (i+1))
+    ? {unit:pre.toLowerCase() + "s", item:f} : null;
+}
+function countDone(r, bId, n){
+  let c = 0;
+  for(let i=0;i<n;i++) if(r.sets[bId + "-" + i]) c++;
+  return c;
+}
+
 /* ============ RENDER ============ */
 function show(name){
-  ["setup","library","app","settings","progress"].forEach(s => el(s).classList.toggle("hidden", s !== name));
-  if(name === "setup"){
-    el("eyebrow").textContent = "Setup"; el("hDay").textContent = "•";
-    el("hWeek").textContent = ""; el("hTitle").textContent = "Set your loads";
-  } else if(name === "settings"){
-    el("eyebrow").textContent = "Settings"; el("hDay").textContent = "•";
-    el("hWeek").textContent = ""; el("hTitle").textContent = "Loads and data";
-  } else if(name === "progress"){
-    el("eyebrow").textContent = "Progress"; el("hDay").textContent = "•";
-    el("hWeek").textContent = ""; el("hTitle").textContent = "Charts and streaks";
-  }
-  el("backTop").classList.toggle("hidden", name !== "app" && name !== "settings" && name !== "progress");
+  ["setup","library","app","settings","progress","coach"].forEach(s => el(s).classList.toggle("hidden", s !== name));
+  /* the big number means a week and a day — outside a session it meant nothing,
+     so it goes away and gives the title the room instead */
+  if(name !== "app") el("hNum").classList.add("hidden");
+  const HEAD = {setup:["Setup","Set your loads"], settings:["Settings","Loads and data"],
+                progress:["Progress","Charts and streaks"], coach:["Coach","Load and readiness"]};
+  if(HEAD[name]){ el("eyebrow").textContent = HEAD[name][0]; el("hTitle").textContent = HEAD[name][1]; }
+  el("backTop").classList.toggle("hidden", name === "setup" || name === "library");
+  if(S) renderClock();
   window.scrollTo(0,0);
 }
 
@@ -1152,7 +1597,16 @@ function renderLibrary(){
   }
   el("bkMsg").textContent = bkMsg;
   el("bkNote").classList.toggle("hidden", !bkMsg);
-  ["libA","libB","libC","libD","libE"].forEach(x => el(x).innerHTML = "");
+  /* the answer to "what now" belongs here, not two taps deep in the coach */
+  const nu = nextUp(loadStats());
+  el("upNext").classList.toggle("hidden", !nu);
+  if(nu){
+    el("upName").textContent = nu.p.name;
+    el("upLine").textContent = nextUpLine(nu) + (nu.light ? " · picked light, your week is already heavy" : "");
+    el("upOpen").onclick = () => openProg(nu.p);
+  }
+  /* libX was missing here: every return to the library appended another copy */
+  ["libX","libA","libB","libC","libD","libE"].forEach(x => el(x).innerHTML = "");
   PROGS.forEach(p => {
     const b = document.createElement("button");
     b.className = "prog" + (p.hot ? " hot" : ""); b.type = "button";
@@ -1165,7 +1619,6 @@ function renderLibrary(){
     el({A:"libA",B:"libB",C:"libC",D:"libD",E:"libE",X:"libX"}[p.g]).appendChild(b);
   });
   el("eyebrow").textContent = "Training hub";
-  el("hDay").textContent = "—"; el("hWeek").textContent = "";
   el("hTitle").textContent = "Choose a program";
 }
 
@@ -1190,15 +1643,33 @@ function renderTally(){
 function renderNav(){
   const pos = posOf(PROG.id);
   const wks = el("weeks"); wks.innerHTML = "";
-  wks.style.gridTemplateColumns = "repeat(" + Math.min(6, PROG.weeks) + ",1fr)";
   wks.classList.toggle("hidden", PROG.weeks < 2);
-  for(let w=1; w<=PROG.weeks; w++){
-    const b = document.createElement("button");
-    b.className = "wkbtn"; b.type = "button";
-    b.textContent = (PROG.id === "sheiko" && w === 4) ? "WK 4 · deload" : "WK " + w;
-    b.setAttribute("aria-pressed", w === pos.w);
-    b.onclick = () => { pos.w = w; save(); renderSession(); };
-    wks.appendChild(b);
+  if(PROG.weeks > 8){
+    /* a 24-week grid was four rows of buttons before you reached the workout;
+       long plans get a stepper, and they land on the right week by date anyway */
+    wks.style.gridTemplateColumns = "56px 1fr 56px";
+    const step = (txt, to, dis, lab) => {
+      const b = document.createElement("button");
+      b.className = "wkbtn step"; b.type = "button"; b.textContent = txt;
+      b.disabled = dis; b.setAttribute("aria-label", lab);
+      b.onclick = () => { pos.w = to; save(); renderSession(); };
+      return b;
+    };
+    const lab = document.createElement("div");
+    lab.className = "wklab";
+    lab.textContent = (PROG.id === "sheiko" && pos.w === 4 ? "Week 4 · deload" : "Week " + pos.w) + " of " + PROG.weeks;
+    wks.append(step("‹", Math.max(1, pos.w-1), pos.w <= 1, "Previous week"), lab,
+               step("›", Math.min(PROG.weeks, pos.w+1), pos.w >= PROG.weeks, "Next week"));
+  } else {
+    wks.style.gridTemplateColumns = "repeat(" + Math.min(4, PROG.weeks) + ",1fr)";
+    for(let w=1; w<=PROG.weeks; w++){
+      const b = document.createElement("button");
+      b.className = "wkbtn"; b.type = "button";
+      b.textContent = (PROG.id === "sheiko" && w === 4) ? "WK 4 · deload" : "WK " + w;
+      b.setAttribute("aria-pressed", w === pos.w);
+      b.onclick = () => { pos.w = w; save(); renderSession(); };
+      wks.appendChild(b);
+    }
   }
   const dys = el("days"); dys.innerHTML = "";
   dys.style.gridTemplateColumns = "repeat(" + Math.min(4, PROG.days) + ",1fr)";
@@ -1220,8 +1691,10 @@ function renderSession(){
   const pos = posOf(PROG.id), r = rec(PROG.id, pos.w, pos.d), built = PROG.build(pos.w, pos.d);
   BUILT = built;
   el("eyebrow").textContent = PROG.name + (PROG.id === "sheiko" ? " · cycle " + S.cycle : "");
-  el("hDay").textContent = PROG.days > 1 ? "D" + pos.d : "•";
-  el("hWeek").textContent = PROG.weeks > 1 ? "Week " + pos.w : "";
+  const multi = PROG.days > 1, dated = PROG.weeks > 1;
+  el("hNum").classList.toggle("hidden", !multi && !dated);
+  el("hDay").textContent = multi ? "D" + pos.d : "W" + pos.w;
+  el("hWeek").textContent = multi && dated ? "Week " + pos.w : "";
   el("hTitle").textContent = built.title;
   el("progNote").textContent = built.note || "";
   renderTally(); renderNav();
@@ -1257,6 +1730,7 @@ function renderSession(){
     /* mixer blocks read and write the source program's record */
     const rb = b.src ? rec(b.src, b.sw, b.sd) : r;
     const bId = b.sbi != null ? b.sbi : bi;
+    const rep = repetitive(b);      /* scanned once, not once per branch */
     const wrapEl = document.createElement("div");
     wrapEl.className = "lift";
     const reps = b.items.reduce((a,i) => a + (i.reps || 0), 0);
@@ -1277,6 +1751,21 @@ function renderSession(){
         const u = document.createElement("span"); u.className = "unit"; u.textContent = "kg";
         row.append(nm, inp, u); wrapEl.appendChild(row);
       });
+    } else if(rep){
+      const n = b.items.length, done = countDone(rb, bId, n);
+      const box = document.createElement("div");
+      box.className = "counter"; box.dataset.cbi = bi;
+      box.innerHTML =
+        '<button class="cbtn" type="button" data-cnt="-" aria-label="One fewer ' + esc(rep.unit) + '"' +
+          (done ? '' : ' disabled') + '>−</button>' +
+        '<div class="cnum" aria-live="polite"><b>' + done + ' <span>/ ' + n + '</span></b>' +
+          '<em>' + esc(rep.unit + (rep.item.sub ? " · " + rep.item.sub : "")) + '</em></div>' +
+        '<button class="cbtn" type="button" data-cnt="+" aria-label="One more ' + esc(rep.unit) + '"' +
+          (done >= n ? ' disabled' : '') + '>+</button>';
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.innerHTML = '<i style="width:' + (done/n*100) + '%"></i>';
+      wrapEl.append(box, bar);
     } else {
       const grid = document.createElement("div"); grid.className = "sets";
       b.items.forEach((it, ii) => {
@@ -1317,7 +1806,8 @@ function renderSession(){
   const pr = el("presets"); pr.innerHTML = "";
   [30,60,90,120,180].forEach(s => {
     const b = document.createElement("button"); b.type = "button";
-    b.textContent = s < 60 ? s + " s" : (s/60) + " min";
+    /* "1.5 min" overflowed a fifth of a 375px screen — seconds up to 90 */
+    b.textContent = s < 120 ? s + " s" : (s/60) + " min";
     b.onclick = () => startTimer(s, "Rest");
     pr.appendChild(b);
   });
@@ -1337,8 +1827,11 @@ function renderSession(){
 
 /* ============ SET TICKS (delegated; surgical update, no full re-render) ============ */
 el("session").addEventListener("click", e => {
+  if(!BUILT || !PROG) return;
+  const cnt = e.target && e.target.closest ? e.target.closest("button.cbtn") : null;
+  if(cnt){ counterTap(cnt); return; }
   const btn = e.target && e.target.closest ? e.target.closest("button.set") : null;
-  if(!btn || !BUILT || !PROG) return;
+  if(!btn) return;
   const bi = +btn.dataset.bi, ii = +btn.dataset.ii;
   const b = BUILT.blocks[bi]; if(!b) return;
   const it = b.items[ii]; if(!it) return;
@@ -1356,6 +1849,40 @@ el("session").addEventListener("click", e => {
   if(it.rest) startTimer(it.rest, "Rest · " + b.n);
   save(); renderTally(); renderNav();
 });
+
+/* + fills the lowest untouched slot, − clears the highest filled one, so a
+   half-finished block from the chip era still counts correctly. */
+function counterTap(cbtn){
+  const box = cbtn.closest(".counter"), bi = +box.dataset.cbi;
+  const b = BUILT.blocks[bi]; if(!b) return;
+  const rep = repetitive(b); if(!rep) return;
+  const pos = posOf(PROG.id);
+  const r = b.src ? rec(b.src, b.sw, b.sd) : rec(PROG.id, pos.w, pos.d);
+  const bId = b.sbi != null ? b.sbi : bi, n = b.items.length;
+  const up = cbtn.dataset.cnt === "+";
+  if(up){
+    let i = 0; while(i < n && r.sets[bId + "-" + i]) i++;
+    if(i >= n) return;
+    const it = b.items[i];
+    r.sets[bId + "-" + i] = true;
+    r.d0 = r.d0 || todayISO();
+    r.reps = r.reps || {};
+    r.reps[bId + "-" + i] = {n:it.reps || 0, c:it.cnt || "", l:b.l || ""};
+    if(it.rest) startTimer(it.rest, "Rest · " + b.n);
+  } else {
+    let i = n - 1; while(i >= 0 && !r.sets[bId + "-" + i]) i--;
+    if(i < 0) return;
+    delete r.sets[bId + "-" + i];
+    if(r.reps) delete r.reps[bId + "-" + i];
+  }
+  const done = countDone(r, bId, n);
+  box.querySelector(".cnum b").innerHTML = done + ' <span>/ ' + n + '</span>';
+  box.querySelector('[data-cnt="-"]').disabled = done === 0;
+  box.querySelector('[data-cnt="+"]').disabled = done >= n;
+  const bar = box.parentNode.querySelector(".bar i");
+  if(bar) bar.style.width = (done/n*100) + "%";
+  save(); renderTally(); renderNav();
+}
 
 /* ============ SET EDITOR SHEET ============ */
 let SHEET = null;
@@ -1397,9 +1924,9 @@ el("shClose").onclick = closeSheet;
 el("scrim").onclick = closeSheet;
 
 /* ============ PROGRESS ============ */
-/* series colors validated for CVD & contrast on the panel surface (see dataviz checks):
-   squat #C1121F · bench #1D6F9C · deadlift #B07C22 */
-const LIFTCOLORS = [["squat","Squat","#C1121F"],["bench","Bench","#1D6F9C"],["dl","Deadlift","#B07C22"]];
+/* series carry CSS variables, not hex, so the charts follow light and dark;
+   both step sets are validated for CVD and contrast against their own surface */
+const LIFTCOLORS = [["squat","Squat","var(--s1)"],["bench","Bench","var(--s2)"],["dl","Deadlift","var(--s3)"]];
 const dlab = t => { const d = new Date(t);
   return String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0"); };
 
@@ -1427,21 +1954,21 @@ function rmChartHTML(){
   const Y = v => mT + (1-(v-v0)/(v1-v0))*(H-mT-mB);
   let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Estimated one-rep max over time">';
   [v0, (v0+v1)/2, v1].forEach(v => {
-    s += '<line x1="' + mL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#C9C7BD" stroke-width="1"/>' +
-         '<text x="' + (mL-4) + '" y="' + (Y(v)+3).toFixed(1) + '" text-anchor="end" font-size="9" font-family="Menlo,monospace" fill="#7C7C72">' + Math.round(v) + '</text>';
+    s += '<line x1="' + mL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(v).toFixed(1) + '" class="cg" stroke-width="1"/>' +
+         '<text x="' + (mL-4) + '" y="' + (Y(v)+3).toFixed(1) + '" text-anchor="end" class="ct">' + Math.round(v) + '</text>';
   });
   LIFTCOLORS.forEach(l => {
     const arr = pts[l[0]].slice().sort((a,b) => a.t - b.t);
     const line = arr.filter(p => !p.dot);
-    if(line.length > 1) s += '<path d="' + line.map((p,i) => (i ? "L" : "M") + X(p.t).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ") + '" fill="none" stroke="' + l[2] + '" stroke-width="2"/>';
+    if(line.length > 1) s += '<path d="' + line.map((p,i) => (i ? "L" : "M") + X(p.t).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ") + '" fill="none" style="stroke:' + l[2] + '" stroke-width="2"/>';
     else if(line.length === 1)   /* a single saved 1RM still deserves a visible level */
-      s += '<line x1="' + mL + '" y1="' + Y(line[0].v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(line[0].v).toFixed(1) + '" stroke="' + l[2] + '" stroke-width="2" stroke-dasharray="6 4" opacity=".85"/>';
+      s += '<line x1="' + mL + '" y1="' + Y(line[0].v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(line[0].v).toFixed(1) + '" style="stroke:' + l[2] + '" stroke-width="2" stroke-dasharray="6 4" opacity=".85"/>';
     arr.filter(p => p.dot).forEach(p => {
-      s += '<circle cx="' + X(p.t).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) + '" r="3.5" fill="' + l[2] + '" stroke="#F2F1EC" stroke-width="1.5"/>';
+      s += '<circle cx="' + X(p.t).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) + '" r="3.5" style="fill:' + l[2] + '" class="cring" stroke-width="1.5"/>';
     });
   });
-  s += '<text x="' + mL + '" y="' + (H-6) + '" font-size="9" font-family="Menlo,monospace" fill="#7C7C72">' + dlab(t0) + '</text>' +
-       '<text x="' + (W-mR) + '" y="' + (H-6) + '" text-anchor="end" font-size="9" font-family="Menlo,monospace" fill="#7C7C72">' + dlab(t1) + '</text></svg>';
+  s += '<text x="' + mL + '" y="' + (H-6) + '" class="ct">' + dlab(t0) + '</text>' +
+       '<text x="' + (W-mR) + '" y="' + (H-6) + '" text-anchor="end" class="ct">' + dlab(t1) + '</text></svg>';
   s += '<div class="leg">' + LIFTCOLORS.map(l =>
     '<span><i style="background:' + l[2] + '"></i>' + l[1] + " " + (S.oneRM[l[0]] || "—") + ' kg</span>').join("") + '</div>' +
     '<p class="lede" style="margin:8px 0 0">Lines follow your saved 1RMs; dots are Epley estimates from sets where you logged actual weight × reps.</p>';
@@ -1490,14 +2017,14 @@ function swChartHTML(){
   const Y = v => mT + (1 - v/vMax)*(H-mT-mB);
   let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cumulative swings toward ten thousand">';
   [0, 5000, 10000].forEach(v => {
-    s += '<line x1="' + mL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#C9C7BD" stroke-width="1"' + (v === 10000 ? ' stroke-dasharray="4 3"' : '') + '/>' +
-         '<text x="' + (mL-4) + '" y="' + (Y(v)+3).toFixed(1) + '" text-anchor="end" font-size="9" font-family="Menlo,monospace" fill="#7C7C72">' + (v/1000) + 'k</text>';
+    s += '<line x1="' + mL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(v).toFixed(1) + '" class="cg" stroke-width="1"' + (v === 10000 ? ' stroke-dasharray="4 3"' : '') + '/>' +
+         '<text x="' + (mL-4) + '" y="' + (Y(v)+3).toFixed(1) + '" text-anchor="end" class="ct">' + (v/1000) + 'k</text>';
   });
-  s += '<path d="' + p.map((q,i) => (i ? "L" : "M") + X(q.t).toFixed(1) + " " + Y(q.v).toFixed(1)).join(" ") + '" fill="none" stroke="#C1121F" stroke-width="2"/>';
-  if(projT) s += '<line x1="' + X(last).toFixed(1) + '" y1="' + Y(cum).toFixed(1) + '" x2="' + X(projT).toFixed(1) + '" y2="' + Y(10000).toFixed(1) + '" stroke="#C1121F" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"/>';
-  s += '<circle cx="' + X(last).toFixed(1) + '" cy="' + Y(cum).toFixed(1) + '" r="3.5" fill="#C1121F" stroke="#F2F1EC" stroke-width="1.5"/>';
-  s += '<text x="' + mL + '" y="' + (H-6) + '" font-size="9" font-family="Menlo,monospace" fill="#7C7C72">' + dlab(t0) + '</text>' +
-       '<text x="' + (W-mR) + '" y="' + (H-6) + '" text-anchor="end" font-size="9" font-family="Menlo,monospace" fill="#7C7C72">' + dlab(t1) + '</text></svg>';
+  s += '<path d="' + p.map((q,i) => (i ? "L" : "M") + X(q.t).toFixed(1) + " " + Y(q.v).toFixed(1)).join(" ") + '" fill="none" style="stroke:var(--red)" stroke-width="2"/>';
+  if(projT) s += '<line x1="' + X(last).toFixed(1) + '" y1="' + Y(cum).toFixed(1) + '" x2="' + X(projT).toFixed(1) + '" y2="' + Y(10000).toFixed(1) + '" style="stroke:var(--red)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"/>';
+  s += '<circle cx="' + X(last).toFixed(1) + '" cy="' + Y(cum).toFixed(1) + '" r="3.5" style="fill:var(--red)" class="cring" stroke-width="1.5"/>';
+  s += '<text x="' + mL + '" y="' + (H-6) + '" class="ct">' + dlab(t0) + '</text>' +
+       '<text x="' + (W-mR) + '" y="' + (H-6) + '" text-anchor="end" class="ct">' + dlab(t1) + '</text></svg>';
   s += '<p class="lede" style="margin:8px 0 0">' + total.toLocaleString("en") + " done. " + projTxt + '</p>';
   return s;
 }
@@ -1526,6 +2053,103 @@ function calHTML(){
   return {grid:'<div class="cal">' + cells + '</div>',
     note:(streak ? "Current streak: " + streak + (streak === 1 ? " day. " : " days. ") : "") +
       last30 + " training " + (last30 === 1 ? "day" : "days") + " in the last 30. Last 12 weeks, Monday at the top."};
+}
+
+function loadChartHTML(st){
+  if(!st.daysLogged) return '<p class="lede" style="margin:0">Nothing logged yet — this fills in as you train.</p>';
+  const W = 340, H = 132, mL = 30, mR = 8, mT = 8, mB = 18;
+  const vals = st.month.slice().reverse();               /* oldest → today */
+  const max = Math.max.apply(null, vals.concat([1]));
+  const bw = (W - mL - mR)/28, avg = st.chronic/7;
+  const Y = v => mT + (1 - v/max)*(H - mT - mB);
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Daily training load over the last 28 days">';
+  [0, max].forEach(v => {
+    s += '<line x1="' + mL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(v).toFixed(1) + '" class="cg" stroke-width="1"/>' +
+         '<text x="' + (mL-4) + '" y="' + (Y(v)+3).toFixed(1) + '" text-anchor="end" class="ct">' + Math.round(v) + '</text>';
+  });
+  vals.forEach((v,i) => {
+    if(v <= 0) return;
+    const h = Math.max(2, (H - mT - mB) * v/max);
+    s += '<rect x="' + (mL + i*bw + 1).toFixed(1) + '" y="' + (H - mB - h).toFixed(1) +
+         '" width="' + Math.max(1, bw - 2).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1" class="cbar"/>';
+  });
+  if(avg > 0)
+    s += '<line x1="' + mL + '" y1="' + Y(avg).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(avg).toFixed(1) +
+         '" class="cavg" stroke-width="1.5" stroke-dasharray="5 4"/>';
+  s += '<text x="' + mL + '" y="' + (H-5) + '" class="ct">4 weeks ago</text>' +
+       '<text x="' + (W-mR) + '" y="' + (H-5) + '" text-anchor="end" class="ct">today</text></svg>';
+  /* the reference line is named here rather than inside the plot, where it collided with the bars */
+  s += '<p class="lede" style="margin:8px 0 0">One bar per day in arbitrary units — minutes × how hard that session is. The dashed line is your 28-day daily average: bars above it are days that added load, below it are days that let you absorb it.</p>';
+  return s;
+}
+let ADVICE = [];
+function renderCoach(){
+  const st = loadStats();
+  const c = S.coach = S.coach || {auto:false, lastRun:"", log:[]};
+  const ready = st.span >= 10 && st.chronic > 0;
+  let head, lead, state;
+  if(!st.daysLogged){ head = "No data yet"; state = "idle"; lead = "Tick sets and use Start workout — the coach needs about ten days of training before it can judge your load."; }
+  else if(!ready){ head = "Learning you"; state = "idle"; lead = "Day " + st.span + " of the 10 needed for a baseline. It is already learning how long your sessions really take."; }
+  else if(st.acwr > 1.5){ head = "Load spike"; state = "alert"; lead = "This week is well above what you're conditioned for. The advice below is worth taking."; }
+  else if(st.acwr > 1.3){ head = "Pushing hard"; state = "neutral"; lead = "A hard week on top of a normal base. Fine once — don't repeat it next week."; }
+  else if(st.acwr < 0.75){ head = "Undertrained"; state = "neutral"; lead = "You're carrying less than usual. There's room to add without much risk."; }
+  else { head = "In the sweet spot"; state = "good"; lead = "Your recent week sits close to what your body is used to. Keep going."; }
+  /* the word carries the state; the colour only reinforces it */
+  el("coBox").className = "tally st-" + state;
+  el("coStatus").textContent = head;
+  el("coRatio").innerHTML = ready ? '<em>' + st.acwr.toFixed(2) + '</em> acute : chronic' : '<em>' + st.daysLogged + '</em> days logged';
+  el("coGauge").style.width = Math.min(100, ready ? st.acwr/2*100 : st.span/10*100) + "%";
+  el("coLead").textContent = lead;
+
+  ADVICE = buildAdvice(st);
+  const host = el("coAdvice"); host.innerHTML = "";
+  if(!ADVICE.length) host.innerHTML = '<p class="lede" style="margin:0">Nothing to change. Keep doing what you\'re doing.</p>';
+  ADVICE.forEach(a => {
+    const row = document.createElement("div"); row.className = "acc-row";
+    const nm = document.createElement("div"); nm.className = "acc-name";
+    nm.innerHTML = esc(a.t) + "<em>" + esc(a.d) + "</em>";
+    row.appendChild(nm);
+    if(a.act){
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "wkbtn";
+      b.style.minHeight = "44px"; b.style.minWidth = "76px"; b.style.flex = "0 0 auto";
+      b.textContent = a.act.label;
+      b.onclick = () => { a.act.fn(); save(); renderCoach(); toast("Applied"); };
+      row.appendChild(b);
+    }
+    host.appendChild(row);
+  });
+
+  const n = nextUp(st);
+  const nx = el("coNext"); nx.innerHTML = "";
+  if(!n) nx.innerHTML = '<p class="lede" style="margin:0">No program has been touched in the last three weeks. Open any one from the library and the coach picks the thread back up.</p>';
+  else {
+    const row = document.createElement("div"); row.className = "acc-row";
+    const nm = document.createElement("div"); nm.className = "acc-name";
+    nm.innerHTML = esc(n.p.name) + "<em>" + nextUpLine(n) +
+      (n.light ? " · the lightest thing you have going, because your load is high"
+               : n.spike ? " · nothing lighter on the go — consider a rest day instead" : "") + "</em>";
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "wkbtn";
+    b.style.minHeight = "44px"; b.style.minWidth = "76px"; b.style.flex = "0 0 auto";
+    b.textContent = "Open";
+    b.onclick = () => openProg(n.p);
+    row.append(nm, b);
+    nx.appendChild(row);
+  }
+
+  el("coChart").innerHTML = loadChartHTML(st);
+  el("coNums").innerHTML =
+    '<div><span>Last 7 days</span><span>' + Math.round(st.acute) + ' AU</span></div>' +
+    '<div><span>28-day week average</span><span>' + Math.round(st.chronic) + ' AU</span></div>' +
+    '<div><span>Acute : chronic</span><span>' + (ready ? st.acwr.toFixed(2) : "—") + '</span></div>' +
+    '<div><span>Monotony</span><span>' + (st.monotony ? st.monotony.toFixed(1) : "—") + '</span></div>' +
+    '<div><span>Rest days this week</span><span>' + st.rest7 + '</span></div>' +
+    '<div><span>Training days logged</span><span>' + st.daysLogged + '</span></div>';
+  el("coAuto").value = c.auto ? "1" : "0";
+  el("coLog").innerHTML = (c.log && c.log.length)
+    ? c.log.map(x => '<div><span>' + esc(x.m) + '</span><span>' + esc(x.d) + '</span></div>').join("")
+    : '<div><span>No adjustments made yet.</span></div>';
 }
 
 function renderProgress(){
@@ -1578,7 +2202,16 @@ el("library").addEventListener("click", function(e){
 el("backTop").onclick = () => { renderLibrary(); show("library"); };
 el("backBtn").onclick = () => { renderLibrary(); show("library"); };
 el("backBtn2").onclick = () => { renderLibrary(); show("library"); };
+el("backBtn3").onclick = () => { renderLibrary(); show("library"); };
 el("progressBtn").onclick = () => { renderProgress(); show("progress"); };
+el("coachBtn").onclick = () => { renderCoach(); show("coach"); };
+el("coAuto").onchange = () => {
+  const c = S.coach = S.coach || {auto:false, lastRun:"", log:[]};
+  c.auto = el("coAuto").value === "1";
+  if(c.auto){ c.lastRun = ""; coachAuto(); }     /* let it act today, not tomorrow */
+  save(); renderCoach();
+  toast(c.auto ? "Coach will manage your load" : "Coach will only advise");
+};
 
 el("sessNote").onchange = () => {
   if(!PROG) return;
@@ -1631,10 +2264,10 @@ function advance(){
 
 function feedback(v){
   const id = PROG.id, now = A(id);
-  let next = now;
-  if(v < 0) next = Math.max(0.80, now - 0.05);
-  if(v > 0) next = Math.min(1.15, now + 0.025);
-  S.adj[id] = next;
+  /* your own verdict always applies (force), but it claims the day so the
+     auto-pilot cannot stack a second change on the same program */
+  if(v !== 0) adjBy(id, v < 0 ? -0.05 : 0.025, true);
+  const next = A(id);
   advance();
   save();
   toast(v < 0 ? "Scaled back to " + Math.round(next*100) + "% — next session ready"
@@ -1662,8 +2295,12 @@ el("settingsBtn").onclick = () => {
   al.innerHTML = rows || '<div><span>Everything at 100% of the base plan.</span></div>';
   const h = el("histList");
   h.innerHTML = S.history.length
-    ? S.history.map(x => '<div><span>' + esc(x.d + ' · ' + x.p) + '</span><span>W' + esc(String(x.w)) + ' D' + esc(String(x.day)) +
-        (x.t ? ' · ' + hhmmss(x.t) : '') + (x.k && S.log[x.k] && S.log[x.k].note ? ' ✎' : '') + '</span></div>').join("")
+    ? S.history.map(x => {
+        const note = x.k && S.log[x.k] ? S.log[x.k].note : "";
+        return '<div><span>' + esc(x.d + ' · ' + x.p) + '</span><span>W' + esc(String(x.w)) + ' D' + esc(String(x.day)) +
+          (x.t ? ' · ' + hhmmss(x.t) : '') + '</span></div>' +
+          (note ? '<div class="histnote">' + esc(note) + '</div>' : '');
+      }).join("")
     : '<div><span>No sessions logged yet.</span></div>';
   show("settings");
 };
@@ -1768,7 +2405,7 @@ el("fileIn").onchange = e => {
       const d = JSON.parse(rd.result);
       if(!d.oneRM) throw new Error("shape");
       const keepGh = S && S.gh ? S.gh : null;      /* exports carry no token — keep this device's */
-      S = Object.assign(blank(), d);
+      S = sane(Object.assign(blank(), d));
       S.v = d.v || 1;
       migrate();
       if(keepGh && keepGh.token && !ghCfg().token) S.gh.token = keepGh.token;
@@ -1779,24 +2416,34 @@ el("fileIn").onchange = e => {
 };
 el("wipeBtn").onclick = () => {
   if(!confirm("Erase all loads, ticks and history? This cannot be undone.")) return;
-  S = blank(); save(); show("setup");
+  S = blank(); save(); renderClock(); show("setup");   /* also stops a running clock's interval */
 };
 
 /* pure helpers exposed for testing (osascript / console) */
 window.TH = {v:9, parseTime:parseTime, epley:epley, mmss:mmss, hhmmss:hhmmss, plates:plates, esc:esc, kgOf:kgOf,
   _blank:blank, _migrate:migrate, _setS:o => { S = o; }, _getS:() => S, _progs:PROGS,
   _build:(id,w,d) => progById(id).build(w,d), _weekNPL:weekNPL, _countAll:countAll,
-  _export:exportJSON, _b64:b64utf8, _ghBackup:ghBackup, _ghRestore:ghRestore, _wkElapsed:wkElapsed};
+  _export:exportJSON, _b64:b64utf8, _ghBackup:ghBackup, _ghRestore:ghRestore, _wkElapsed:wkElapsed,
+  _sane:sane, _posOf:posOf, _adjBy:adjBy, _repetitive:repetitive, _countDone:countDone,
+  _nextUp:nextUp, _nextUpLine:nextUpLine, _sheikoIntensity:sheikoIntensity, _dayIntensity:dayIntensity,
+  _sessionLoad:sessionLoad, _loadStats:loadStats, _advice:buildAdvice, _coachAuto:coachAuto,
+  _learnedMinutes:learnedMinutes, _estMinutes:estMinutes, _progCompletion:progCompletion, _bestE1RM:bestE1RM};
 
 /* ============ BOOT ============ */
 (async function(){
   try{
     const raw = await load();
-    S = Object.assign(blank(), raw || {});
+    S = sane(Object.assign(blank(), raw || {}));
     if(raw) S.v = raw.v || 1;
     if(migrate()) save();
+    /* a clock still running after hours was forgotten, not trained — drop it
+       rather than stamp a bogus duration on the next session you finish */
+    if(S.wk && S.wk.run && wkElapsed() > 6*3600){
+      S.wk = null; save();
+      toast("Workout clock had run for hours — discarded");
+    }
     if(!S.setup) show("setup");
-    else { renderLibrary(); show("library"); }
+    else { coachAuto(); renderLibrary(); show("library"); }
     renderClock();                 /* a clock left running survives reload and lock */
     /* served over https (GitHub Pages): cache for offline use + silent auto-update */
     if("serviceWorker" in navigator && location.protocol === "https:"){

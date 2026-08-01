@@ -25,9 +25,11 @@
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
 /* Dark is chosen, not flipped: every value re-picked and re-validated against
-   the dark surface — 5:1 or better for text, series re-stepped for CVD. */
+   the dark surface — 5:1 or better for text, series re-stepped for CVD.
+   Three ways in: the phone's setting (media query), or a manual override —
+   .light pins the light theme, .dark pins the dark one (see applyTheme). */
 @media (prefers-color-scheme:dark){
-  :root{
+  :root:not(.light){
     --paper:#131416; --panel:#1C1E21; --ink:#E8E7E1;
     --red:#FF4D5E; --good:#6FBF87;
     /* lifted above the page, not sunk below it, so the angled cut still reads */
@@ -35,11 +37,22 @@
     --steel:#6FA0C8; --muted:#9A9A90; --line:#33363B;
     --s1:#DC5555; --s2:#3F8FC7; --s3:#B88827;
   }
-  .acc-row input,.field input,.field select{background:#0E0F11;color:var(--ink)}
-  .set[aria-pressed="true"]{color:#131416}
-  .set[aria-pressed="true"] .reps{color:rgba(19,20,22,.8)}
-  .wkbtn[aria-pressed="true"]{color:#0E0F11}
+  :root:not(.light) .acc-row input,:root:not(.light) .field input,:root:not(.light) .field select{background:#0E0F11;color:#E8E7E1}
+  :root:not(.light) .set[aria-pressed="true"]{color:#131416}
+  :root:not(.light) .set[aria-pressed="true"] .reps{color:rgba(19,20,22,.8)}
+  :root:not(.light) .wkbtn[aria-pressed="true"]{color:#0E0F11}
 }
+:root.dark{
+  --paper:#131416; --panel:#1C1E21; --ink:#E8E7E1;
+  --red:#FF4D5E; --good:#6FBF87;
+  --brand:#2A2E34; --brand-ink:#E8E7E1;
+  --steel:#6FA0C8; --muted:#9A9A90; --line:#33363B;
+  --s1:#DC5555; --s2:#3F8FC7; --s3:#B88827;
+}
+:root.dark .acc-row input,:root.dark .field input,:root.dark .field select{background:#0E0F11;color:#E8E7E1}
+:root.dark .set[aria-pressed="true"]{color:#131416}
+:root.dark .set[aria-pressed="true"] .reps{color:rgba(19,20,22,.8)}
+:root.dark .wkbtn[aria-pressed="true"]{color:#0E0F11}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
@@ -183,6 +196,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 .leg i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:baseline}
 .cal{display:grid;grid-template-rows:repeat(7,14px);grid-auto-flow:column;grid-auto-columns:14px;gap:3px;overflow-x:auto;padding-bottom:4px}
 .cal i{width:14px;height:14px;background:var(--line)}
+.cal i.rest{background:var(--steel)}   /* a declared rest day, not a skip — trained wins if both */
 .cal i.on{background:var(--red)}
 .cal i.future{opacity:.25}
 .cal i.today{outline:2px solid var(--ink);outline-offset:-2px}
@@ -210,6 +224,9 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 .presets.fb3 button{min-height:56px;font-family:var(--disp);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:600}
 .presets button{min-height:46px;font-family:var(--mono);font-size:13px;background:var(--panel);
   border:1px solid var(--line);color:var(--ink);cursor:pointer}
+.presets.rpe{margin:4px 0 0}
+.presets.rpe button{min-height:40px}
+.presets.rpe button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
 .timerbar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--panel);
   padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:40}
 .timerbar.ring{background:var(--red)}
@@ -217,6 +234,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 .timerbar .lab{font-family:var(--disp);text-transform:uppercase;letter-spacing:.14em;font-size:12px;opacity:.8;display:block}
 .timerbar button{min-height:44px;padding:0 14px;background:transparent;border:1px solid rgba(242,241,236,.5);
   color:var(--panel);font-family:var(--disp);text-transform:uppercase;letter-spacing:.1em;font-size:13px;font-weight:600;cursor:pointer}
+.timerbar button:disabled{opacity:.35;cursor:default}
 .wkmini{position:fixed;left:0;right:0;bottom:0;z-index:35;background:var(--panel);border-top:2px solid var(--ink);
   display:flex;align-items:stretch;gap:8px;padding:8px 16px calc(8px + env(safe-area-inset-bottom))}
 .wkmini.stacked{padding-bottom:8px}   /* bottom offset is measured, not guessed — see renderClock */
@@ -312,6 +330,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   <div id="libC"></div>
   <p class="sechead">Running</p>
   <div id="libE"></div>
+  <button class="big ghost" id="restBtn">Log today as a rest day</button>
   <button class="big ghost" id="coachBtn">Coach — load &amp; readiness</button>
   <button class="big ghost" id="progressBtn">Progress &amp; charts</button>
   <button class="big ghost" id="timerOnly">Open rest timer</button>
@@ -341,6 +360,8 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   <div id="fbBox" class="hidden">
     <p class="blocknote" id="fbLead">How did that sit? The next sessions scale from your answer.</p>
     <div class="presets fb3" id="fbBtns"></div>
+    <p class="blocknote">And how hard was it, 1–10? 1 is a walk, 10 is a funeral. Optional, but it sharpens the coach.</p>
+    <div class="presets rpe" id="rpeBtns"></div>
   </div>
 </section>
 
@@ -370,6 +391,11 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   <div class="card chartbox"><h3>Estimated 1RM</h3><div id="rmChart"></div></div>
   <div class="card"><h3>Week NPL · <span id="cycLab"></span></h3><div id="nplChart"></div></div>
   <div class="card chartbox"><h3>Swings — road to 10,000</h3><div id="swChart"></div></div>
+  <div class="card"><h3>Bodyweight</h3>
+    <div class="field"><label for="bwI">Today</label><input id="bwI" type="number" inputmode="decimal" step="0.1" placeholder="kg"></div>
+    <button class="big ghost" id="bwAdd">Log bodyweight</button>
+    <div class="chartbox" id="bwChart" style="margin-top:12px"></div>
+  </div>
   <div class="card"><h3>Training calendar</h3><div id="calGrid"></div><p class="lede" id="calNote" style="margin:10px 0 0"></p></div>
   <button class="big" id="backBtn2">Back to library</button>
 </section>
@@ -389,6 +415,8 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
     <div class="field"><label for="pu2">Max pull-ups</label><input id="pu2" type="number" inputmode="numeric" step="1"></div>
     <div class="field"><label for="di2">Max dips</label><input id="di2" type="number" inputmode="numeric" step="1"></div>
     <div class="field"><label for="tgt2">Weekly NPL target</label><input id="tgt2" type="number" inputmode="numeric" step="10"></div>
+    <div class="field"><label for="inc2">Round to</label>
+      <select id="inc2"><option value="2.5">2.5 kg</option><option value="1.25">1.25 kg</option><option value="5">5 kg</option></select></div>
     <button class="big" id="saveMaxes">Save</button>
   </div>
   <div class="card">
@@ -413,6 +441,8 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   </div>
   <div class="card">
     <h3>Screen</h3>
+    <div class="field"><label for="themeSel">Theme</label>
+      <select id="themeSel"><option value="system">Follow the phone</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
     <div class="field"><label for="awakeSel">Hold screen awake</label>
       <select id="awakeSel"><option value="1">During rests</option><option value="0">Never</option></select></div>
   </div>
@@ -427,7 +457,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   <div class="card"><h3>Log</h3><div class="hist" id="histList"></div></div>
   <div class="card">
     <h3>GitHub backup</h3>
-    <p class="lede">Pushes your data to <span style="font-family:var(--mono)">backups/training-hub-data.json</span> in a private repo — every push becomes a version in the repo's history. Make a <b>fine-grained token</b> (github.com → Settings → Developer settings) scoped to that one repo with <b>Contents: read and write</b>. The token never leaves this device and is stripped from every backup.</p>
+    <p class="lede">Pushes your data to <span style="font-family:var(--mono)">backups/training-hub-data.json</span> in a private repo — every push becomes a version in the repo's history. Make a <b>fine-grained token</b> (github.com → Settings → Developer settings) scoped to that one repo with <b>Contents: read and write</b>. The token never leaves this device and is stripped from every backup — but it does sit unencrypted in this browser's storage, so use one you can revoke.</p>
     <div class="field"><label for="ghRepo">Repo</label><input id="ghRepo" type="text" placeholder="owner/training-hub" style="width:190px;text-align:right" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
     <div class="field"><label for="ghTok">Token</label><input id="ghTok" type="password" placeholder="github_pat_…" style="width:190px;text-align:right"></div>
     <div class="field"><label for="ghAuto">Auto-backup</label>
@@ -450,7 +480,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 
 <div class="timerbar hidden" id="timerBar">
   <div><span class="lab" id="tLab">Rest</span><span class="t" id="tLeft">0:00</span></div>
-  <button id="tRing">Ring</button><button id="tPlus">+30 s</button><button id="tStop">Stop</button>
+  <button id="tRing" disabled>Ring</button><button id="tPlus">+30 s</button><button id="tStop">Stop</button>
 </div>
 
 <!-- set editor: opens when you tap an already-ticked set -->
@@ -501,7 +531,8 @@ let S = null, PROG = null, BUILT = null;
 const blank = () => ({
   v:SCHEMA, setup:false, oneRM:{squat:0,bench:0,dl:0}, kb:24, bag:12, row2k:450, pmax:8, dmax:10, run5k:1800, adj:{}, awake:true, ring:false, ringName:"Rest Timer",
   target:140, inc:2.5, cycle:1, pos:{}, log:{}, history:[], rmLog:[], start:{}, lastExport:"",
-  gh:{repo:"", token:"", auto:false}, mixSel:[], wk:null, coach:{auto:false, lastRun:"", log:[]}
+  gh:{repo:"", token:"", auto:false}, mixSel:[], wk:null, coach:{auto:false, lastRun:"", log:[]},
+  rest:{}, bw:[], theme:"system", deload:{}
 });
 /* Anything that arrives from storage or a restored backup is untrusted: one
    null field used to take the whole app down with it. Repair, never trust. */
@@ -517,16 +548,32 @@ function sane(o){
   o.pmax = Math.round(pos(o.pmax, 8)); o.dmax = Math.round(pos(o.dmax, 10));
   o.target = Math.round(pos(o.target, 140)); o.inc = pos(o.inc, 2.5);
   o.cycle = Math.max(1, Math.round(pos(o.cycle, 1)));
-  ["log","pos","adj","gh","coach","start"].forEach(k => {
+  ["log","pos","adj","gh","coach","start","rest","deload"].forEach(k => {
     if(!o[k] || typeof o[k] !== "object" || Array.isArray(o[k])) o[k] = b[k];
   });
-  ["history","rmLog","mixSel"].forEach(k => { if(!Array.isArray(o[k])) o[k] = []; });
+  ["history","rmLog","mixSel","bw"].forEach(k => { if(!Array.isArray(o[k])) o[k] = []; });
+  o.theme = ["system","light","dark"].indexOf(o.theme) > -1 ? o.theme : "system";
+  Object.keys(o.rest).forEach(k => { if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) delete o.rest[k]; });
+  Object.keys(o.deload).forEach(k => {
+    const v = o.deload[k];
+    if(!v || typeof v !== "object" || !/^\d{4}-\d{2}-\d{2}$/.test(String(v.until))){ delete o.deload[k]; return; }
+    /* prev feeds straight back into adj on expiry — keep it inside the same
+       0.80–1.15 envelope adj itself is clamped to, even in hand-edited backups */
+    const p = parseFloat(v.prev); v.prev = isFinite(p) && p > 0 ? Math.min(1.15, Math.max(0.80, p)) : 1;
+  });
+  o.bw = o.bw.filter(x => x && typeof x === "object" && /^\d{4}-\d{2}-\d{2}$/.test(String(x.d)) && parseFloat(x.kg) > 0)
+    .map(x => ({d:x.d, kg:parseFloat(x.kg)})).slice(-200);
   /* entries too, not just the arrays: one null row used to throw from the
      calendar and the settings log, which render them without guarding */
-  o.history = o.history.filter(x => x && typeof x === "object");
-  o.rmLog = o.rmLog.filter(x => x && typeof x === "object");
+  o.history = o.history.filter(x => x && typeof x === "object").slice(0, 200);
+  o.rmLog = o.rmLog.filter(x => x && typeof x === "object").slice(-200);
+  /* a garbage anchor date ("run start" from a hand-edited backup) used to
+     produce NaN weeks and a "NaN-NaN-NaN" anchor on the paced plans */
+  Object.keys(o.start).forEach(k => {
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(o.start[k]))) delete o.start[k];
+  });
   o.mixSel = o.mixSel.filter(x => typeof x === "string" && progById(x));
-  o.coach.log = Array.isArray(o.coach.log) ? o.coach.log.filter(x => x && typeof x === "object") : [];
+  o.coach.log = Array.isArray(o.coach.log) ? o.coach.log.filter(x => x && typeof x === "object").slice(0, 60) : [];
   o.gh.repo = String(o.gh.repo || ""); o.gh.token = String(o.gh.token || "");
   Object.keys(o.adj).forEach(k => {
     const v = parseFloat(o.adj[k]);
@@ -538,6 +585,7 @@ function sane(o){
     if(!r.sets || typeof r.sets !== "object") r.sets = {};
     if(!r.acc || typeof r.acc !== "object") r.acc = {};
     if(r.reps && typeof r.reps !== "object") delete r.reps;
+    if(r.rpe != null){ const n = Math.round(num(r.rpe, 0)); if(n < 1 || n > 10) delete r.rpe; else r.rpe = n; }
     if(r.dur != null) r.dur = num(r.dur, 0);
     if(r.dsh != null) r.dsh = Math.max(1, Math.round(num(r.dsh, 1)));
   });
@@ -605,6 +653,41 @@ function migrate(){
   });
   S.v = SCHEMA;
   return true;
+}
+
+/* ============ DELOAD ============
+   A declared easy week: 85% for 7 days, then the previous scale comes back.
+   Stored separately from adj so ending it never guesses what came before. */
+function expireDeloads(){
+  const D = (S && S.deload) || {}, t = todayISO();
+  let changed = false;
+  Object.keys(D).forEach(id => {
+    /* "85% until <until>" — the until date itself is the first normal day,
+       which also makes the active stretch exactly 7 days, not 8 */
+    if(t >= D[id].until){
+      const prev = D[id].prev;
+      if(prev && Math.abs(prev - 1) > 0.001) S.adj[id] = prev; else delete S.adj[id];
+      delete D[id]; changed = true;
+    }
+  });
+  if(changed) save();
+}
+function toggleDeload(id){
+  S.deload = S.deload || {};
+  const p = progById(id), name = p ? p.name : id;
+  if(S.deload[id]){
+    const prev = S.deload[id].prev;
+    if(prev && Math.abs(prev - 1) > 0.001) S.adj[id] = prev; else delete S.adj[id];
+    delete S.deload[id];
+    coachNote("Deload ended early on " + name);
+    save(); el("settingsBtn").onclick(); toast("Deload ended — back to " + pctLabel(id));
+    return;
+  }
+  const until = new Date(); until.setDate(until.getDate() + 7);
+  S.deload[id] = {until: isoOf(until), prev: A(id)};
+  S.adj[id] = 0.85;
+  coachNote("Deloaded " + name + " for a week");
+  save(); el("settingsBtn").onclick(); toast(name + " at 85% until " + isoOf(until));
 }
 
 /* ============ AUTOREGULATION ============ */
@@ -675,6 +758,27 @@ function logRM(){
   if(last && last.d === cur.d) S.rmLog[S.rmLog.length-1] = cur;
   else S.rmLog.push(cur);
   S.rmLog = S.rmLog.slice(-100);
+}
+
+/* ============ THEME ============
+   .dark pins dark, .light pins light (the media query respects :not(.light)),
+   "system" removes both and puts the meta media attributes back. */
+function applyTheme(){
+  const t = (S && S.theme) || "system";
+  const root = document.documentElement;
+  root.classList.toggle("dark", t === "dark");
+  root.classList.toggle("light", t === "light");
+  const dark = t === "dark" || (t !== "light" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+  const mc = document.querySelectorAll('meta[name="theme-color"]');
+  mc.forEach((m,i) => {
+    if(t === "system"){
+      m.setAttribute("media", i === 0 ? "(prefers-color-scheme: light)" : "(prefers-color-scheme: dark)");
+      m.setAttribute("content", i === 0 ? "#17181B" : "#2A2E34");
+    } else {
+      m.removeAttribute("media");
+      m.setAttribute("content", dark ? "#2A2E34" : "#17181B");
+    }
+  });
 }
 
 /* ============ GITHUB BACKUP ============
@@ -788,6 +892,7 @@ function startTimer(sec, label){
   if(S.ring) handoff(sec);
   TM.len = sec; TM.end = Date.now() + sec*1000;
   el("tLab").textContent = label || "Rest";
+  el("tRing").disabled = false;
   el("timerBar").classList.remove("hidden","ring");
   clearInterval(TM.iv);
   TM.iv = setInterval(tick, 200); tick(); renderClock();
@@ -798,19 +903,23 @@ function tick(){
   if(left <= 0){
     clearInterval(TM.iv); TM.iv = null;
     el("timerBar").classList.add("ring");
+    el("tRing").disabled = true;
     el("tLeft").textContent = "0:00"; el("tLab").textContent = "Go";
     beep(); if(navigator.vibrate) navigator.vibrate([200,80,200]);
     keepAlive(false); wake(false);
     setTimeout(()=>{ if(!TM.iv){ el("timerBar").classList.add("hidden"); renderClock(); } }, 6000);
   }
 }
-el("tStop").onclick = () => { clearInterval(TM.iv); TM.iv = null; keepAlive(false); wake(false); el("timerBar").classList.add("hidden"); renderClock(); };
+el("tStop").onclick = () => { clearInterval(TM.iv); TM.iv = null; keepAlive(false); wake(false); el("tRing").disabled = true; el("timerBar").classList.add("hidden"); renderClock(); };
 /* the countdown is a timestamp, not a tick count — it is always correct on return */
 document.addEventListener("visibilitychange", () => {
   if(document.visibilityState === "visible" && TM.iv){ wake(true); tick(); }
 });
 el("tRing").onclick = () => handoff(Math.max(1,(TM.end - Date.now())/1000));
-el("tPlus").onclick = () => { TM.end += 30000; el("timerBar").classList.remove("ring"); if(!TM.iv) TM.iv = setInterval(tick,200); tick(); };
+el("tPlus").onclick = () => { TM.end += 30000; el("timerBar").classList.remove("ring");
+  el("tRing").disabled = false;
+  if(el("tLab").textContent === "Go") el("tLab").textContent = "Rest";   /* ringing state said "Go" — a resumed countdown isn't */
+  if(!TM.iv) TM.iv = setInterval(tick,200); tick(); };
 
 /* ============ WORKOUT CLOCK ============
    Timestamp-based like the rest timer: locking the phone or reloading
@@ -840,6 +949,9 @@ function renderClock(){
   const barUp = !el("timerBar").classList.contains("hidden");
   mini.classList.toggle("stacked", barUp);
   mini.style.bottom = barUp ? el("timerBar").offsetHeight + "px" : "";
+  /* with both bars stacked, the toast's default perch is BEHIND the mini bar —
+     and the toast is the main feedback channel exactly then */
+  el("toast").style.bottom = (onScreen && barUp) ? "calc(164px + env(safe-area-inset-bottom))" : "";
   el("wkMiniT").textContent = t;
   el("wkMiniPause").textContent = w && !w.run ? "Resume" : "Pause";
   clearInterval(WCIV); WCIV = null;
@@ -1120,7 +1232,13 @@ const HERO = [
   b:[["Rounds","ROUNDS20"]]},
  {n:"Filthy Fifty", sub:"for time",
   note:"50 reps of each, in order. A long grinder — 25 to 40 min is normal.",
-  b:[["Stations",[["50 box jumps","60 cm",0],["50 jumping pull-ups","",0],["50 kettlebell swings","",0],["50 walking lunges","",0],["50 knees to elbows","",0],["50 push press","light",0],["50 back extensions","",0],["50 wall-ball shots","",0],["50 burpees","",0],["50 double-unders","",0]]]]}
+  b:[["Stations",[["50 box jumps","60 cm",0],["50 jumping pull-ups","",0],["50 kettlebell swings","",0],["50 walking lunges","",0],["50 knees to elbows","",0],["50 push press","light",0],["50 back extensions","",0],["50 wall-ball shots","",0],["50 burpees","",0],["50 double-unders","",0]]]]},
+ {n:"Jack", sub:"20 min AMRAP",
+  note:"10 push press with your bell, 10 swings, 10 box jumps — as many rounds as you can in 20 min. The push press is the bottleneck: dip and drive, don't press it strict.",
+  b:[["Rounds","JACK"]]},
+ {n:"Loredo", sub:"6 rounds for time",
+  note:"24 squats, 24 push-ups, 24 walking lunges and a 400 m run, six times through. The runs are where you make time back — honest but smooth, not a sprint.",
+  b:[["Rounds",[["Round 1","24 / 24 / 24 / 400 m",0],["Round 2","24 / 24 / 24 / 400 m",0],["Round 3","24 / 24 / 24 / 400 m",0],["Round 4","24 / 24 / 24 / 400 m",0],["Round 5","24 / 24 / 24 / 400 m",0],["Round 6","24 / 24 / 24 / 400 m",0]]]]}
 ];
 function heroSession(w,d){
   const h = HERO[d-1], blocks = [];
@@ -1129,9 +1247,13 @@ function heroSession(w,d){
     if(spec === "ROUNDS20"){
       for(let i=1;i<=20;i++) items.push({label:"Round " + i, sub:"5 pull-ups · 10 push-ups · 15 squats", rest:0});
     } else if(spec === "TEN10"){
-      for(let i=1;i<=10;i++) items.push({label:"10", sub:"reps", reps:10, rest:0});
+      /* numbered labels make the counter read "sets · 10 reps" instead of "10 · reps" */
+      for(let i=1;i<=10;i++) items.push({label:"Set " + i, sub:"10 reps", reps:10, rest:0});
     } else if(spec === "MIN30"){
       for(let i=1;i<=30;i++) items.push({label:"Min " + i, sub:"5 · 10 · 15", rest:0});
+    } else if(spec === "JACK"){
+      /* the swings inside each round count toward the odometer */
+      for(let i=1;i<=20;i++) items.push({label:"Round " + i, sub:"10 push press · 10 swings · 10 box jumps", reps:10, rest:0, cnt:"sw"});
     } else if(spec === "HELEN"){
       for(let r=1;r<=3;r++){
         items.push({label:"400 m", sub:"run · round " + r, rest:0});
@@ -1168,6 +1290,116 @@ function pullSession(w,d){
               {label:"30 s", sub:"hollow hold", rest:45},{label:"30 s", sub:"hollow hold", rest:45},
               {label:"30 s", sub:"scapular hang", rest:45},{label:"30 s", sub:"scapular hang", rest:45},
               {label:"5", sub:"slow negatives, 5 s down", rest:90}]}]};
+}
+
+/* ---------- 5/3/1 (barbell, training-max waves) ---------- */
+const F531 = [
+ {t:"5s week", s:[[65,5],[75,5],[85,5]]},
+ {t:"3s week", s:[[70,3],[80,3],[90,3]]},
+ {t:"5/3/1 week", s:[[75,5],[85,3],[95,1]]},
+ {t:"Deload", s:[[40,5],[50,5],[60,5]]}
+];
+const F531ACC = {
+ squat:[["Leg press","3 × 10"],["Lying leg curl","3 × 12"],["Ab wheel rollout","3 × 10"]],
+ bench:[["Chest-supported row","3 × 10"],["DB bench press","3 × 10"],["Rope pushdown","2 × 15"]],
+ dl:[["Good morning, light","3 × 8"],["Lat pulldown","3 × 10"],["Hanging leg raise","3 × 10"]]
+};
+function f531Session(w,d){
+  const lift = ["squat","bench","dl"][d-1];
+  const lname = {squat:"Back Squat",bench:"Bench Press",dl:"Deadlift"}[lift];
+  const wave = F531[w-1], tm = (S.oneRM[lift] || 0) * 0.9 * A("531");
+  const kg = p => tm ? fmt(round(tm*p/100)) + " kg" : "— kg";
+  const work = wave.s.map((s,i) => ({
+    label:s[0] + "%" + (i === 2 && w < 4 ? "+" : ""), sub:kg(s[0]),
+    reps:s[1], rest:w === 4 ? 120 : 180}));
+  return {title:wave.t + " · " + lname,
+    note:scaleNote("531") + "Wendler's 5/3/1. Percentages are off " +
+      (S.oneRM[lift] ? fmt(round(S.oneRM[lift]*0.9)) + " kg — 90% of the " + S.oneRM[lift] + " kg on file" : "a training max you have not set") + ". " +
+      (w < 4 ? "The + set is a rep-out: stop with one clean rep left. A ground rep costs you next week."
+             : "Deload: same bar path, half the effort. Leave wanting more."),
+    blocks:[
+      {n:"Warm-up", note:"Ramp for the " + lname.toLowerCase() + ".", kind:"sets", items:[
+        {label:"40%", sub:kg(40), reps:5, rest:60},
+        {label:"50%", sub:kg(50), reps:5, rest:60},
+        {label:"60%", sub:kg(60), reps:3, rest:90}]},
+      {n:lname, l:lift, note:w < 4 ? "Three work sets; the last is the rep-out." : "Three easy sets.",
+       kind:"sets", items:work},
+      {n:"Assistance", note:"Near failure is fine here. The anchor above, never.", kind:"acc",
+       items:F531ACC[lift].map(a => ({label:a[0], sub:a[1]}))}]};
+}
+
+/* ---------- KETTLEBELL COMPLEXES (clean + press + squat) ---------- */
+function complexSession(w,d){
+  const names = ["Light day","Medium day","Heavy day"];
+  const rounds = Math.max(2, Math.min(10, [3,4,5][d-1] + Math.floor((w-1)/2) + step("complex")));
+  const items = [];
+  for(let i=1;i<=rounds;i++)
+    items.push({label:"Round " + i, sub:"clean + press + 2 front squats, each side · " + S.kb + " kg", rest:90});
+  return {title:names[d-1] + " · " + rounds + " complexes",
+    note:scaleNote("complex") + "One round: clean, press, two front squats — left side, then right, and the bell never touches the floor until the round is over. " + S.kb + " kg. If a press grinds, the day is done, not just the round.",
+    blocks:[{n:"Complex", note:"", kind:"sets", items:items}]};
+}
+
+/* ---------- UNWEIGHTED LEGS (pistol & Nordic progressions) ---------- */
+function legsSession(w,d){
+  const sp = step("legs");
+  if(d === 1){
+    const stage = w <= 2 ? "box pistol to a chair" : w <= 4 ? "assisted pistol, holding a post"
+                : w <= 6 ? "full pistol squat" : "full pistol, 2 s pause at the bottom";
+    const reps = Math.max(3, Math.min(8, 3 + Math.floor(w/2) + sp));
+    const pi = [], ss = [], ca = [];
+    for(let i=0;i<3;i++){ pi.push({label:"× " + reps, sub:stage + " — left", reps:reps, rest:75});
+                          pi.push({label:"× " + reps, sub:stage + " — right", reps:reps, rest:75}); }
+    for(let i=0;i<3;i++){ ss.push({label:"12", sub:"split squat, rear foot up — left", reps:12, rest:60});
+                          ss.push({label:"12", sub:"split squat, rear foot up — right", reps:12, rest:60}); }
+    for(let i=0;i<2;i++){ ca.push({label:"15", sub:"single-leg calf raise — left", reps:15, rest:45});
+                          ca.push({label:"15", sub:"single-leg calf raise — right", reps:15, rest:45}); }
+    return {title:"Squat pattern · " + stage,
+      note:scaleNote("legs") + "No weight anywhere — the progression does the loading. Own the bottom position before you chase reps; a bounced pistol is a knee complaint in waiting.",
+      blocks:[{n:"Pistol progression", note:"Alternate sides; rest is per side.", kind:"sets", items:pi},
+              {n:"Split squats", note:"", kind:"sets", items:ss},
+              {n:"Calves", note:"", kind:"sets", items:ca}]};
+  }
+  const neg = Math.max(3, Math.min(8, 3 + Math.floor(w/2) + sp));
+  const nc = [], rd = [], gb = [];
+  for(let i=1;i<=neg;i++) nc.push({label:"Rep " + i, sub:w <= 4 ? "5 s negative, push back up" : "3 s negative, pull halfway up", reps:1, rest:90});
+  for(let i=0;i<3;i++){ rd.push({label:"10", sub:"single-leg Romanian deadlift — left", reps:10, rest:60});
+                        rd.push({label:"10", sub:"single-leg Romanian deadlift — right", reps:10, rest:60}); }
+  for(let i=0;i<3;i++) gb.push({label:"20", sub:"glute bridge march, slow", reps:20, rest:45});
+  return {title:"Hinge pattern · Nordic work",
+    note:scaleNote("legs") + "The Nordic curl is the unweighted deadlift — brutal at bodyweight. Anchor your heels under anything solid and pad your knees. " +
+      (w <= 4 ? "Push back up with your hands for now; the negative is the work."
+              : "Try to pull the first half back up. Hips extended the whole way down — a bent hip is a rest you are not counting."),
+    blocks:[{n:"Nordic curl", note:"", kind:"sets", items:nc},
+            {n:"Single-leg hinge", note:"", kind:"sets", items:rd},
+            {n:"Glutes", note:"", kind:"sets", items:gb}]};
+}
+
+/* ---------- BOXING ENGINE (round-based conditioning) ---------- */
+function boxSession(w,d){
+  const sp = step("box");
+  if(d === 1){
+    const rounds = Math.max(3, Math.min(8, 4 + Math.floor(w/2) + sp));
+    const items = [];
+    for(let i=1;i<=rounds;i++) items.push({label:"Round " + i, sub:"3 min skipping or easy shadowboxing", rest:60});
+    return {title:"Aerobic rounds · " + rounds + " × 3 min",
+      note:scaleNote("box") + "The base everything else sits on: relaxed, rhythmic, breathing through the nose the whole way. A minute between rounds. If you can't talk, you're going too hard — this is the day that makes the hard days possible.",
+      blocks:[{n:"Rounds", note:"", kind:"sets", items:items}]};
+  }
+  if(d === 2){
+    const rounds = Math.max(3, Math.min(7, 3 + Math.floor(w/2) + sp));
+    const items = [];
+    for(let i=1;i<=rounds;i++) items.push({label:"Round " + i, sub:"6 × 30 s fast hands / 30 s easy", rest:60});
+    return {title:"Interval rounds · " + rounds + " × 3 min",
+      note:scaleNote("box") + "Fast hands means fast, not hard — speed dies before power does, and it's speed you're buying. Thirty seconds on, thirty floating, six times a round. Shoulders down, chin tucked, breathing sharp.",
+      blocks:[{n:"Rounds", note:"", kind:"sets", items:items}]};
+  }
+  const n = Math.max(6, Math.min(16, 8 + w + sp));
+  const items = [];
+  for(let i=1;i<=n;i++) items.push({label:"Sprint " + i, sub:"20 s heavy bag or burpees · 40 s walk", rest:40});
+  return {title:"Power intervals · " + n + " × 20 s",
+    note:scaleNote("box") + "Twenty seconds at nine-tenths, forty seconds walking it off. Stop a sprint the moment the power drops — that last ugly rep teaches your body to be tired, not fast. Keep this away from heavy squat days.",
+    blocks:[{n:"Sprints", note:"", kind:"sets", items:items}]};
 }
 
 /* ---------- RUN COACH: 5 km base to marathon, 24 weeks ---------- */
@@ -1221,7 +1453,7 @@ function runSession(w,d){
 }
 
 /* ---------- SESSION MIXER: stack blocks from any programs ---------- */
-const MIXSHORT = {sheiko:"Sheiko", kimura:"Kimura", swing:"Swings", ss:"S&S", rop:"RoP", pull:"Ladders", hero:"Hero", bag:"Bag", row:"Row", run:"Run"};
+const MIXSHORT = {sheiko:"Sheiko", "531":"5/3/1", kimura:"Kimura", swing:"Swings", ss:"S&S", rop:"RoP", complex:"Complex", pull:"Ladders", hero:"Hero", legs:"Legs", bag:"Bag", row:"Row", box:"Boxing", run:"Run"};
 function mixSession(){
   const sel = (S.mixSel || []).filter(id => { const p = progById(id); return p && !p.mixer; });
   const blocks = [], names = [];
@@ -1244,13 +1476,20 @@ function mixSession(){
 const PROGS = [
  {id:"mix", g:"X", name:"Session Mixer", tag:"Stack blocks from any programs into one workout", weeks:1, days:1, build:mixSession, mixer:true, hot:true},
  {id:"sheiko", g:"A", name:"Sheiko Hybrid", tag:"Percentage strength · 4-week cycles × 4 days", weeks:4, days:4, build:sheikoSession, npl:true, hot:true},
+ {id:"531", g:"A", name:"5/3/1 Strength", tag:"Wendler · 90% training max · 4-week waves × 3 days", weeks:4, days:3, build:f531Session, hot:true,
+  dayName:d => ["Squat","Bench","Deadlift"][d-1]},
  {id:"kimura", g:"A", name:"Kimura Protocol", tag:"Judo conditioning, scaled · 12 weeks × 3 days", weeks:12, days:3, build:kimuraSession},
  {id:"swing", g:"B", name:"10,000 Swings", tag:"Dan John · scalable · 200–500 a session", weeks:10, days:4, build:swingSession, hot:true},
  {id:"ss",  g:"B", name:"Simple & Sinister", tag:"Pavel · daily practice · 100 swings + 10 get-ups", weeks:1, days:1, build:ssSession},
  {id:"rop", g:"B", name:"Rite of Passage", tag:"Pavel · press ladders · 8 weeks × 3 days", weeks:8, days:3, build:ropSession},
+ {id:"complex", g:"B", name:"Kettlebell Complexes", tag:"Clean, press, squat · 6 weeks × 3 days", weeks:6, days:3, build:complexSession},
  {id:"pull", g:"D", name:"Pull-up & Dip Ladders", tag:"Unweighted · 12 weeks × 5 days", weeks:12, days:5, build:pullSession, hot:true},
- {id:"hero", g:"D", name:"Benchmark Challenges", tag:"Murph, Cindy, Angie, Barbara and four more", weeks:1, days:8, build:heroSession, dayName:d => HERO[d-1].n},
+ {id:"legs", g:"D", name:"Unweighted Legs", tag:"Pistol & Nordic progressions · 8 weeks × 2 days", weeks:8, days:2, build:legsSession,
+  dayName:d => ["Squat","Hinge"][d-1]},
+ {id:"hero", g:"D", name:"Benchmark Challenges", tag:"Murph, Cindy, Angie, Barbara and six more", weeks:1, days:10, build:heroSession, dayName:d => HERO[d-1].n},
  {id:"bag", g:"C", name:"Bulgarian Bag", tag:"4 circuits · 40 / 20 · 8 weeks", weeks:8, days:4, build:bagSession},
+ {id:"box", g:"C", name:"Boxing Engine", tag:"3-minute rounds & intervals · 8 weeks × 3 days", weeks:8, days:3, build:boxSession,
+  dayName:d => ["Aerobic","Interval","Power"][d-1]},
  {id:"row", g:"C", name:"Indoor Rowing", tag:"Split-based · 12 weeks × 3 days", weeks:12, days:3, build:rowSession},
  {id:"run", g:"E", name:"Run Coach", tag:"5 km to marathon · 24 weeks × 5 days", weeks:24, days:5, build:runSession, hot:true, paced:true,
   dayName:d => ["Easy","Work","Recov","Long","Cross"][d-1]}
@@ -1322,7 +1561,7 @@ function dayDone(p,w,d){
    much of the session you completed. Acute (7 d) against chronic (28 d mean)
    is the familiar acute:chronic ratio — a rule of thumb for spotting spikes,
    not a diagnosis, and it says nothing about sleep, work stress or a rota. */
-const COACH_INT = {sheiko:7, kimura:6, swing:8, ss:5, rop:7, pull:6, hero:9, bag:8, row:7, run:5};
+const COACH_INT = {sheiko:7, "531":8, kimura:6, swing:8, ss:5, rop:7, complex:7, pull:6, hero:9, legs:6, bag:8, box:7, row:7, run:5};
 const ROW_INT = {UT2:4, UT1:5, AT:7, TR:9, AN:9, "2k":10};
 /* Percentage work tells you its own intensity. A deload week at 60% counted
    the same as a heavy week at 85% while this was a constant; now the ticked
@@ -1383,32 +1622,43 @@ function sessionLoad(id,w,d,r){
   return Math.round(mins * dayIntensity(id,w,d,r));
 }
 function loadStats(){
-  const per = {}, byProg = {};
+  const per = {}, byProg = {}, rpes = [];
   Object.keys(S.log).forEach(k => {
     const r = S.log[k]; if(!r.d0) return;
     const parts = k.split("|"), id = parts[0];
     const L = sessionLoad(id, +parts[parts.length-2], +parts[parts.length-1], r);
+    /* a session logged before noon used to compute age -1 and drop out of
+       byProg — the coach then ignored today's morning work when picking a lever */
+    const age = Math.max(0, Math.floor((Date.now() - new Date(r.d0 + "T12:00").getTime())/864e5));
+    if(age < 7 && r.rpe > 0) rpes.push(r.rpe);
     if(!L) return;
     per[r.d0] = (per[r.d0] || 0) + L;
-    const age = Math.floor((Date.now() - new Date(r.d0 + "T12:00").getTime())/864e5);
-    if(age >= 0 && age < 7) byProg[id] = (byProg[id] || 0) + L;
+    if(age < 7) byProg[id] = (byProg[id] || 0) + L;
   });
   const today = new Date();
   const at = i => { const dt = new Date(today); dt.setDate(today.getDate() - i); return per[isoOf(dt)] || 0; };
   const week = [], month = [];
   for(let i=0;i<7;i++) week.push(at(i));
   for(let i=0;i<28;i++) month.push(at(i));
+  const days = Object.keys(per).sort();
+  const span = days.length ? Math.floor((Date.now() - new Date(days[0] + "T12:00").getTime())/864e5) + 1 : 0;
   const acute = week.reduce((a,b) => a+b, 0);
-  const chronic = month.reduce((a,b) => a+b, 0)/4;
+  /* the 28 pre-app days are not rest days — averaging over four phantom weeks
+     shrank chronic and read every new user's day 10–27 as a load spike
+     (acwr 2.8 at steady training), which the auto-pilot then "fixed" wrongly */
+  const win = Math.max(7, Math.min(28, span || 28));
+  const chronic = month.reduce((a,b) => a+b, 0) * 7 / win;
   const mean = acute/7;
   const sd = Math.sqrt(week.reduce((a,b) => a + (b-mean)*(b-mean), 0)/7);
-  const days = Object.keys(per).sort();
+  let restLogged7 = 0;
+  for(let i=0;i<7;i++){ const dt = new Date(today); dt.setDate(today.getDate() - i);
+    if(S.rest && S.rest[isoOf(dt)]) restLogged7++; }
   return {per:per, at:at, week:week, month:month, acute:acute, chronic:chronic,
     acwr: chronic > 0 ? acute/chronic : 0,
     monotony: sd > 0.01 ? mean/sd : 0,
-    rest7: week.filter(x => x === 0).length,
-    byProg:byProg, daysLogged:days.length,
-    span: days.length ? Math.floor((Date.now() - new Date(days[0] + "T12:00").getTime())/864e5) + 1 : 0};
+    rest7: week.filter(x => x === 0).length, restLogged7:restLogged7,
+    rpeAvg: rpes.length ? rpes.reduce((a,b) => a+b, 0)/rpes.length : 0, rpeN: rpes.length,
+    byProg:byProg, daysLogged:days.length, span:span};
 }
 function progCompletion(id,n){
   const recs = [];
@@ -1424,7 +1674,7 @@ function progCompletion(id,n){
   let s = 0;
   use.forEach(x => { s += doneFrac(p, x.w, x.dd, x.r)[2]; });
   return {frac:s/use.length, n:use.length, last:use[0].d,
-    age: Math.floor((Date.now() - new Date(use[0].d + "T12:00").getTime())/864e5)};
+    age: Math.max(0, Math.floor((Date.now() - new Date(use[0].d + "T12:00").getTime())/864e5))};
 }
 /* best honest single-set estimate from what you actually logged */
 function bestE1RM(lift,days){
@@ -1498,6 +1748,10 @@ function buildAdvice(st){
       act:{label:"+2.5%", fn:() => scaleTop(st,0.025)}});
   if(st.acute > 0 && st.monotony > 2 && st.rest7 <= 1)
     out.push({t:"Every day looks the same", d:"Monotony " + st.monotony.toFixed(1) + " with " + (st.rest7 ? "one day off" : "no day off") + ". The same total is easier to absorb with a genuinely easy day in it — take one."});
+  /* the ratio says the week is fine; the dial says otherwise — believe the dial */
+  if(st.rpeN >= 2 && st.rpeAvg >= 8 && st.acwr <= 1.5)
+    out.push({t:"Costing more than it shows", d:"Average RPE " + st.rpeAvg.toFixed(1) + " across " + st.rpeN + " sessions this week, at a load the model calls normal. The numbers say the week is fine; you say it isn't — believe you. A small cut on the heaviest program now beats a forced week off later.",
+      act:{label:"−2.5%", fn:() => scaleTop(st,-0.025)}});
   PROGS.forEach(p => {
     if(p.mixer) return;
     const c = progCompletion(p.id, 3);
@@ -1553,13 +1807,13 @@ function repetitive(b){
   const f = b.items[0];
   const alike = b.items.every(it => it.sub === f.sub && (it.reps||0) === (f.reps||0) && (it.rest||0) === (f.rest||0));
   if(!alike) return null;
-  if(b.items.every(it => it.label === f.label)) return {unit:f.label, item:f};
+  if(b.items.every(it => it.label === f.label)) return {unit:f.label, one:f.label, item:f};
   /* "Round 1…20", "Min 1…30" — a numbering, which is also just a count */
   const m = String(f.label).match(/^(.+?)\s+1$/);
   if(!m) return null;
   const pre = m[1];
   return b.items.every((it,i) => it.label === pre + " " + (i+1))
-    ? {unit:pre.toLowerCase() + "s", item:f} : null;
+    ? {unit:pre.toLowerCase() + "s", one:pre.toLowerCase(), item:f} : null;
 }
 function countDone(r, bId, n){
   let c = 0;
@@ -1582,6 +1836,10 @@ function show(name){
 }
 
 function renderLibrary(){
+  expireDeloads();
+  /* a declared rest day reads differently from a skipped one */
+  const rd = todayISO(), isRest = !!(S.rest && S.rest[rd]);
+  el("restBtn").textContent = isRest ? "Rest day logged ✓ — tap to undo" : "Log today as a rest day";
   const c = countAll();
   el("swNow").textContent = c.sw.toLocaleString("en");
   el("swBar").style.width = Math.min(100, c.sw/100) + "%";
@@ -1642,6 +1900,18 @@ function renderTally(){
 
 function renderNav(){
   const pos = posOf(PROG.id);
+  /* paced plans: move the anchor, not just the pointer — openProg recomputes
+     the calendar week from S.start on every open, so a manual week change that
+     only touched pos.w was silently thrown away on the next visit */
+  const goWeek = w => {
+    if(PROG.paced){
+      S.start = S.start || {};
+      const a = S.start[PROG.id] ? new Date(S.start[PROG.id] + "T00:00") : new Date();
+      a.setDate(a.getDate() - (w - pos.w) * 7);
+      S.start[PROG.id] = isoOf(a);
+    }
+    pos.w = w; save(); renderSession();
+  };
   const wks = el("weeks"); wks.innerHTML = "";
   wks.classList.toggle("hidden", PROG.weeks < 2);
   if(PROG.weeks > 8){
@@ -1652,7 +1922,7 @@ function renderNav(){
       const b = document.createElement("button");
       b.className = "wkbtn step"; b.type = "button"; b.textContent = txt;
       b.disabled = dis; b.setAttribute("aria-label", lab);
-      b.onclick = () => { pos.w = to; save(); renderSession(); };
+      b.onclick = () => goWeek(to);
       return b;
     };
     const lab = document.createElement("div");
@@ -1667,7 +1937,7 @@ function renderNav(){
       b.className = "wkbtn"; b.type = "button";
       b.textContent = (PROG.id === "sheiko" && w === 4) ? "WK 4 · deload" : "WK " + w;
       b.setAttribute("aria-pressed", w === pos.w);
-      b.onclick = () => { pos.w = w; save(); renderSession(); };
+      b.onclick = () => goWeek(w);
       wks.appendChild(b);
     }
   }
@@ -1756,11 +2026,11 @@ function renderSession(){
       const box = document.createElement("div");
       box.className = "counter"; box.dataset.cbi = bi;
       box.innerHTML =
-        '<button class="cbtn" type="button" data-cnt="-" aria-label="One fewer ' + esc(rep.unit) + '"' +
+        '<button class="cbtn" type="button" data-cnt="-" aria-label="One fewer ' + esc(rep.one || rep.unit) + '"' +
           (done ? '' : ' disabled') + '>−</button>' +
         '<div class="cnum" aria-live="polite"><b>' + done + ' <span>/ ' + n + '</span></b>' +
           '<em>' + esc(rep.unit + (rep.item.sub ? " · " + rep.item.sub : "")) + '</em></div>' +
-        '<button class="cbtn" type="button" data-cnt="+" aria-label="One more ' + esc(rep.unit) + '"' +
+        '<button class="cbtn" type="button" data-cnt="+" aria-label="One more ' + esc(rep.one || rep.unit) + '"' +
           (done >= n ? ' disabled' : '') + '>+</button>';
       const bar = document.createElement("div");
       bar.className = "bar";
@@ -1791,6 +2061,9 @@ function renderSession(){
   });
 
   el("sessNote").value = r.note || "";
+  /* a mixer note has no home: history lines belong to the source programs, so
+     a note saved against the mixer record could never be read back — hide it */
+  el("sessNote").classList.toggle("hidden", !!PROG.mixer);
 
   const fb = el("fbBtns"); fb.innerHTML = "";
   el("fbBox").classList.toggle("hidden", !r.done);
@@ -1799,6 +2072,18 @@ function renderSession(){
     b.onclick = () => feedback(o[1]);
     fb.appendChild(b);
   });
+  /* RPE: what the session cost, which completion % can't say. Tap again to clear. */
+  const rp = el("rpeBtns"); rp.innerHTML = "";
+  for(let v=1; v<=10; v++){
+    const b = document.createElement("button"); b.type = "button"; b.textContent = v;
+    b.setAttribute("aria-pressed", r.rpe === v);
+    b.onclick = () => {
+      r.rpe = (r.rpe === v ? null : v);
+      save(); renderSession();
+      if(r.rpe) toast("RPE " + v + " noted");
+    };
+    rp.appendChild(b);
+  }
   el("fbLead").textContent = A(PROG.id) === 1
     ? "How did that sit? Your answer scales the next sessions and moves you on."
     : "Running at " + pctLabel(PROG.id) + " of the base plan. Answer to scale again and move on.";
@@ -1888,7 +2173,8 @@ function counterTap(cbtn){
 let SHEET = null;
 function updPlates(){
   const w = parseFloat(el("shW").value);
-  const barbell = SHEET ? (SHEET.b.src || (PROG && PROG.id)) === "sheiko" : !!(PROG && PROG.id === "sheiko");
+  const pid = SHEET ? (SHEET.b.src || (PROG && PROG.id)) : (PROG && PROG.id);
+  const barbell = pid === "sheiko" || pid === "531";
   el("shPlates").textContent = (barbell && w >= 20) ? plates(w) : "";
 }
 function openSheet(b, it, r, id){
@@ -1940,7 +2226,9 @@ function rmChartHTML(){
     const r = S.log[k]; if(!r.reps || !r.d0) return;
     Object.keys(r.reps).forEach(id => {
       const f = r.reps[id];
-      if(f && f.w > 0 && f.n > 0 && pts[f.l]) pts[f.l].push({t:new Date(r.d0 + "T12:00").getTime(), v:epley(f.w, f.n), dot:true});
+      /* Epley flatters anything past ~10 reps — the chart now applies the same
+         cutoff the coach's bestE1RM always did, or high-rep sets drew fantasy dots */
+      if(f && f.w > 0 && f.n > 0 && f.n <= 10 && pts[f.l]) pts[f.l].push({t:new Date(r.d0 + "T12:00").getTime(), v:epley(f.w, f.n), dot:true});
     });
   });
   const all = pts.squat.concat(pts.bench, pts.dl);
@@ -2029,6 +2317,37 @@ function swChartHTML(){
   return s;
 }
 
+function bwChartHTML(){
+  const a = (S.bw || []).slice().sort((x,y) => x.d < y.d ? -1 : 1);
+  if(!a.length) return '<p class="lede" style="margin:8px 0 0">One number a week is plenty — same scale, same time of day.</p>';
+  const last = a[a.length-1];
+  let ref = null;
+  for(let i = a.length-1; i >= 0; i--){ if((new Date(last.d + "T12:00") - new Date(a[i].d + "T12:00"))/864e5 >= 21){ ref = a[i]; break; } }
+  const delta = ref ? Math.round((last.kg - ref.kg)*10)/10 : null;
+  const summary = "Latest " + last.kg + " kg (" + last.d + ")" +
+    (delta != null ? " · " + (delta > 0 ? "+" : "") + delta + " kg over the last 3+ weeks." : ".");
+  if(a.length < 2) return '<p class="lede" style="margin:8px 0 0">' + summary + ' The trend line appears after the second entry.</p>';
+  const pts = a.slice(-40).map(x => ({t:new Date(x.d + "T12:00").getTime(), v:x.kg}));
+  let t0 = pts[0].t, t1 = pts[pts.length-1].t, v0 = Infinity, v1 = -Infinity;
+  pts.forEach(p => { v0 = Math.min(v0,p.v); v1 = Math.max(v1,p.v); });
+  if(t1 - t0 < 7*864e5){ t0 -= 3.5*864e5; t1 += 3.5*864e5; }
+  const pad = Math.max(1, (v1-v0)*0.15); v0 -= pad; v1 += pad;
+  const W = 340, H = 130, mL = 38, mR = 8, mT = 8, mB = 18;
+  const X = t => mL + (t1 > t0 ? (t-t0)/(t1-t0) : 0)*(W-mL-mR);
+  const Y = v => mT + (1-(v-v0)/(v1-v0))*(H-mT-mB);
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bodyweight over time">';
+  [v0, (v0+v1)/2, v1].forEach(v => {
+    s += '<line x1="' + mL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W-mR) + '" y2="' + Y(v).toFixed(1) + '" class="cg" stroke-width="1"/>' +
+         '<text x="' + (mL-4) + '" y="' + (Y(v)+3).toFixed(1) + '" text-anchor="end" class="ct">' + (Math.round(v*10)/10) + '</text>';
+  });
+  s += '<path d="' + pts.map((p,i) => (i ? "L" : "M") + X(p.t).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ") + '" fill="none" style="stroke:var(--s2)" stroke-width="2"/>';
+  pts.forEach(p => { s += '<circle cx="' + X(p.t).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) + '" r="3" style="fill:var(--s2)" class="cring" stroke-width="1.5"/>'; });
+  s += '<text x="' + mL + '" y="' + (H-5) + '" class="ct">' + dlab(t0) + '</text>' +
+       '<text x="' + (W-mR) + '" y="' + (H-5) + '" text-anchor="end" class="ct">' + dlab(t1) + '</text></svg>';
+  s += '<p class="lede" style="margin:8px 0 0">' + summary + ' The weekly trend is the signal; the daily number is noise.</p>';
+  return s;
+}
+
 function isoOf(d){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
@@ -2043,16 +2362,25 @@ function calHTML(){
   for(let i = 0; i < 84; i++){
     const d = new Date(start); d.setDate(start.getDate() + i);
     const iso = isoOf(d);
-    cells += '<i class="' + (act[iso] ? "on" : "") + (iso === tIso ? " today" : "") + (iso > tIso ? " future" : "") + '"></i>';
+    cells += '<i class="' + (act[iso] ? "on" : (S.rest && S.rest[iso] ? "rest" : "")) + (iso === tIso ? " today" : "") + (iso > tIso ? " future" : "") + '"></i>';
   }
-  let streak = 0; const c = new Date(today);
-  if(!act[isoOf(c)]) c.setDate(c.getDate() - 1);
-  while(act[isoOf(c)]){ streak++; c.setDate(c.getDate() - 1); }
+  /* a declared rest day doesn't grow the streak, but it doesn't break it either —
+     up to two in a row; a week of "rest" is a break, be honest about it */
+  let streak = 0, bridge = 0; const c = new Date(today);
+  if(!act[isoOf(c)] && !(S.rest && S.rest[isoOf(c)])) c.setDate(c.getDate() - 1);
+  while(true){
+    const iso = isoOf(c);
+    if(act[iso]){ streak++; bridge = 0; }
+    else if(S.rest && S.rest[iso] && bridge < 2){ bridge++; }
+    else break;
+    c.setDate(c.getDate() - 1);
+  }
   let last30 = 0;
   Object.keys(act).forEach(d => { if((today - new Date(d + "T12:00"))/864e5 <= 30) last30++; });
   return {grid:'<div class="cal">' + cells + '</div>',
     note:(streak ? "Current streak: " + streak + (streak === 1 ? " day. " : " days. ") : "") +
-      last30 + " training " + (last30 === 1 ? "day" : "days") + " in the last 30. Last 12 weeks, Monday at the top."};
+      last30 + " training " + (last30 === 1 ? "day" : "days") + " in the last 30. Last 12 weeks, Monday at the top." +
+      (S.rest && Object.keys(S.rest).length ? " Steel squares are declared rest days — they don't break the streak." : "")};
 }
 
 function loadChartHTML(st){
@@ -2114,7 +2442,10 @@ function renderCoach(){
       b.type = "button"; b.className = "wkbtn";
       b.style.minHeight = "44px"; b.style.minWidth = "76px"; b.style.flex = "0 0 auto";
       b.textContent = a.act.label;
-      b.onclick = () => { a.act.fn(); save(); renderCoach(); toast("Applied"); };
+      /* adjBy returns 0 when the one-change-a-day guard or the 80–115% clamp
+         blocks the move — saying "Applied" anyway was a lie */
+      b.onclick = () => { const r = a.act.fn(); save(); renderCoach();
+        toast(r === 0 ? "Nothing changed — already adjusted today" : "Applied"); };
       row.appendChild(b);
     }
     host.appendChild(row);
@@ -2144,7 +2475,8 @@ function renderCoach(){
     '<div><span>28-day week average</span><span>' + Math.round(st.chronic) + ' AU</span></div>' +
     '<div><span>Acute : chronic</span><span>' + (ready ? st.acwr.toFixed(2) : "—") + '</span></div>' +
     '<div><span>Monotony</span><span>' + (st.monotony ? st.monotony.toFixed(1) : "—") + '</span></div>' +
-    '<div><span>Rest days this week</span><span>' + st.rest7 + '</span></div>' +
+    '<div><span>Rest days this week</span><span>' + st.rest7 + (st.restLogged7 ? " · " + st.restLogged7 + " declared" : "") + '</span></div>' +
+    '<div><span>Avg RPE this week</span><span>' + (st.rpeN ? st.rpeAvg.toFixed(1) + " · " + st.rpeN + " sessions" : "—") + '</span></div>' +
     '<div><span>Training days logged</span><span>' + st.daysLogged + '</span></div>';
   el("coAuto").value = c.auto ? "1" : "0";
   el("coLog").innerHTML = (c.log && c.log.length)
@@ -2157,10 +2489,23 @@ function renderProgress(){
   el("cycLab").textContent = "cycle " + S.cycle;
   el("nplChart").innerHTML = nplChartHTML();
   el("swChart").innerHTML = swChartHTML();
+  el("bwChart").innerHTML = bwChartHTML();
+  el("bwI").value = "";
   const c = calHTML();
   el("calGrid").innerHTML = c.grid;
   el("calNote").textContent = c.note;
 }
+el("bwAdd").onclick = () => {
+  const kg = parseFloat(el("bwI").value);
+  if(!(kg > 25 && kg < 400)){ toast("That number doesn't look like a bodyweight"); return; }
+  const d = todayISO();
+  S.bw = S.bw || [];
+  const ex = S.bw.find(x => x.d === d);
+  if(ex) ex.kg = kg; else S.bw.push({d:d, kg:kg});
+  S.bw.sort((a,b) => a.d < b.d ? -1 : 1);
+  S.bw = S.bw.slice(-200);
+  save(); renderProgress(); toast("Logged " + kg + " kg");
+};
 
 /* ============ EVENTS ============ */
 el("saveSetup").onclick = () => {
@@ -2214,7 +2559,7 @@ el("coAuto").onchange = () => {
 };
 
 el("sessNote").onchange = () => {
-  if(!PROG) return;
+  if(!PROG || PROG.mixer) return;
   const pos = posOf(PROG.id), r = rec(PROG.id, pos.w, pos.d);
   r.note = el("sessNote").value.trim();
   save();
@@ -2276,29 +2621,52 @@ function feedback(v){
   renderSession();
 }
 
+el("restBtn").onclick = () => {
+  const d = todayISO();
+  S.rest = S.rest || {};
+  if(S.rest[d]){ delete S.rest[d]; toast("Rest day removed"); }
+  else { S.rest[d] = 1; toast("Rest day logged — recovery counts"); }
+  save(); renderLibrary();
+};
+
 el("timerOnly").onclick = () => startTimer(90, "Rest");
 
 el("settingsBtn").onclick = () => {
   el("sq2").value = S.oneRM.squat; el("bp2").value = S.oneRM.bench; el("dl2").value = S.oneRM.dl;
   el("kb2").value = S.kb; el("bag2").value = S.bag; el("row2").value = mmss(S.row2k); el("tgt2").value = S.target;
   el("run2").value = mmss(S.run5k); el("pu2").value = S.pmax; el("di2").value = S.dmax;
+  el("inc2").value = String(S.inc || 2.5);
   el("runStart").value = (S.start && S.start.run) || "";
   el("awakeSel").value = S.awake ? "1" : "0";
+  el("themeSel").value = S.theme || "system";
   el("ringSel").value = S.ring ? "1" : "0";
   el("ringName").value = S.ringName || "Rest Timer";
   const g = ghCfg();
   el("ghRepo").value = g.repo; el("ghTok").value = g.token;
   el("ghAuto").value = g.auto ? "1" : "0";
-  const al = el("adjList");
-  const rows = PROGS.filter(x => A(x.id) !== 1)
-    .map(x => '<div><span>' + esc(x.name) + '</span><span>' + pctLabel(x.id) + '</span></div>').join("");
-  al.innerHTML = rows || '<div><span>Everything at 100% of the base plan.</span></div>';
+  /* every program gets a row: its scale, and a declared deload week on one tap */
+  const al = el("adjList"); al.innerHTML = "";
+  PROGS.filter(x => !x.mixer).forEach(x => {
+    const dl = (S.deload || {})[x.id];
+    const row = document.createElement("div"); row.className = "acc-row";
+    const nm = document.createElement("div"); nm.className = "acc-name";
+    nm.innerHTML = esc(x.name) + "<em>" + (dl
+      ? "Deload until " + esc(dl.until) + " · then back to " + Math.round(dl.prev*100) + "%"
+      : "Load scale " + pctLabel(x.id)) + "</em>";
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "wkbtn";
+    b.style.minHeight = "44px"; b.style.minWidth = "82px"; b.style.flex = "0 0 auto";
+    b.textContent = dl ? "End now" : "Deload 1 wk";
+    b.onclick = () => toggleDeload(x.id);
+    row.append(nm, b); al.appendChild(row);
+  });
   const h = el("histList");
   h.innerHTML = S.history.length
     ? S.history.map(x => {
-        const note = x.k && S.log[x.k] ? S.log[x.k].note : "";
+        const rr = x.k && S.log[x.k] ? S.log[x.k] : null;
+        const note = rr ? rr.note : "";
         return '<div><span>' + esc(x.d + ' · ' + x.p) + '</span><span>W' + esc(String(x.w)) + ' D' + esc(String(x.day)) +
-          (x.t ? ' · ' + hhmmss(x.t) : '') + '</span></div>' +
+          (x.t ? ' · ' + hhmmss(x.t) : '') + (rr && rr.rpe ? ' · RPE ' + rr.rpe : '') + '</span></div>' +
           (note ? '<div class="histnote">' + esc(note) + '</div>' : '');
       }).join("")
     : '<div><span>No sessions logged yet.</span></div>';
@@ -2323,6 +2691,7 @@ function estimate(){
 });
 el("resetAdj").onclick = () => { S.adj = {}; save(); toast("All programs back to 100%"); el("settingsBtn").onclick(); };
 el("awakeSel").onchange = () => { S.awake = el("awakeSel").value === "1"; save(); };
+el("themeSel").onchange = () => { S.theme = el("themeSel").value; save(); applyTheme(); };
 el("ringSel").onchange = () => { S.ring = el("ringSel").value === "1"; save(); };
 el("ringName").onchange = () => { S.ringName = el("ringName").value.trim() || "Rest Timer"; save(); };
 el("ringTest").onclick = () => handoff(10);
@@ -2350,12 +2719,18 @@ el("saveMaxes").onclick = () => {
   S.run5k = readTime("run2", S.run5k);
   S.pmax = parseInt(el("pu2").value,10)||S.pmax; S.dmax = parseInt(el("di2").value,10)||S.dmax;
   S.target = parseInt(el("tgt2").value,10)||140;
+  S.inc = parseFloat(el("inc2").value)||2.5;
   logRM(); save(); toast("Loads saved");
 };
 el("advanceBtn").onclick = () => {
   if(!(S.oneRM.squat > 0 && S.oneRM.bench > 0 && S.oneRM.dl > 0)){
     toast("Set all three 1RMs first — there is nothing to advance"); return;
   }
+  /* the card said "only if Week 3 moved at the prescribed speed" but nothing
+     ever checked — now it does, against the current cycle's own records */
+  let w3 = 0;
+  for(let d=1; d<=4; d++){ const r = S.log["sheiko|c" + S.cycle + "|3|" + d]; if(r && r.done) w3++; }
+  if(w3 < 4){ toast("Finish Week 3 first — " + w3 + "/4 days logged"); return; }
   if(!confirm("Advance to Sheiko cycle " + (S.cycle+1) + "? Bench +2.5 kg, squat and deadlift +5 kg.")) return;
   S.oneRM.bench += 2.5; S.oneRM.squat += 5; S.oneRM.dl += 5;
   S.cycle++; S.pos.sheiko = {w:1,d:1};
@@ -2371,7 +2746,7 @@ el("exportBtn").onclick = () => {
 };
 el("csvBtn").onclick = () => {
   const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
-  const rows = [["date","program","cycle","week","day","block","set","reps","kg","counter","session_done","workout_s","note"]];
+  const rows = [["date","program","cycle","week","day","block","set","reps","kg","counter","session_done","workout_s","note","rpe"]];
   Object.keys(S.log).forEach(k => {
     const parts = k.split("|"), id = parts[0], p = progById(id);
     if(!p) return;
@@ -2384,7 +2759,7 @@ el("csvBtn").onclick = () => {
       const f = r.reps[sid], ix = sid.split("-");
       const blk = built && built.blocks[+ix[0]], it = blk && blk.items[+ix[1]];
       rows.push([r.d0 || "", p.name, cyc, w, d, blk ? blk.n : ix[0], it ? it.label : ix[1],
-                 f.n, f.w != null ? f.w : "", f.c, r.done ? 1 : 0, r.dur || "", r.note || ""]);
+                 f.n, f.w != null ? f.w : "", f.c, r.done ? 1 : 0, r.dur || "", r.note || "", r.rpe || ""]);
     });
   });
   const blob = new Blob([rows.map(rr => rr.map(q).join(",")).join("\n")], {type:"text/csv"});
@@ -2420,7 +2795,7 @@ el("wipeBtn").onclick = () => {
 };
 
 /* pure helpers exposed for testing (osascript / console) */
-window.TH = {v:9, parseTime:parseTime, epley:epley, mmss:mmss, hhmmss:hhmmss, plates:plates, esc:esc, kgOf:kgOf,
+window.TH = {v:11, parseTime:parseTime, epley:epley, mmss:mmss, hhmmss:hhmmss, plates:plates, esc:esc, kgOf:kgOf,
   _blank:blank, _migrate:migrate, _setS:o => { S = o; }, _getS:() => S, _progs:PROGS,
   _build:(id,w,d) => progById(id).build(w,d), _weekNPL:weekNPL, _countAll:countAll,
   _export:exportJSON, _b64:b64utf8, _ghBackup:ghBackup, _ghRestore:ghRestore, _wkElapsed:wkElapsed,
@@ -2436,6 +2811,8 @@ window.TH = {v:9, parseTime:parseTime, epley:epley, mmss:mmss, hhmmss:hhmmss, pl
     S = sane(Object.assign(blank(), raw || {}));
     if(raw) S.v = raw.v || 1;
     if(migrate()) save();
+    applyTheme();
+    expireDeloads();
     /* a clock still running after hours was forgotten, not trained — drop it
        rather than stamp a bogus duration on the next session you finish */
     if(S.wk && S.wk.run && wkElapsed() > 6*3600){

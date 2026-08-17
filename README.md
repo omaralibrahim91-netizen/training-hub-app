@@ -5,6 +5,8 @@ Questo repo **pubblico** contiene solo il codice dell'app, servito via GitHub Pa
 - `index.html` — l'app (single file)
 - `sw.js` — service worker: offline + aggiornamento automatico
 
+Versione corrente: **v13**, schema dati 4 (migrazione automatica dalle precedenti).
+
 ## Aggiornare l'app
 
 Carica il nuovo `index.html` (Add file → Upload files). Il telefono riceve la nuova versione da solo alla prima apertura con rete: niente da reinstallare.

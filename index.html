@@ -227,12 +227,34 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 .presets.rpe{margin:4px 0 0}
 .presets.rpe button{min-height:40px}
 .presets.rpe button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+/* where-am-I banner: finishing and feedback both change what's on screen — say so */
+#sessBanner{margin:12px 0 2px;padding:11px 13px;border:1px solid var(--line);border-left:4px solid var(--steel);
+  background:var(--panel);font-size:13.5px}
+#sessBanner.ok{border-left-color:var(--good)}
+#sessBanner b{display:block;font-family:var(--disp);text-transform:uppercase;letter-spacing:.05em;font-size:12.5px}
+/* end-of-session panel: a logged session looks logged, not like the same button again */
+#fbBox{border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:12px;margin-top:10px}
+.donehead{display:flex;align-items:center;gap:11px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--line)}
+.donemark{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:var(--good);color:var(--panel);
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+.donetxt{flex:1;min-width:0}
+.donetxt b{display:block;font-family:var(--disp);text-transform:uppercase;letter-spacing:.05em;font-size:15px}
+.donetxt span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+#undoBtn{flex:0 0 auto;min-height:40px;padding:0 14px;background:none;border:1px solid var(--line);color:var(--muted);
+  font-family:var(--mono);font-size:12px;border-radius:3px}
+.presets.fb3 button small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;
+  letter-spacing:0;text-transform:none;opacity:.7;margin-top:2px}
+button.big.go{background:var(--good)}
+/* z-index above the scrim: a rest running behind an open sheet must stay
+   stoppable, and the sheet lifts itself clear of the bar rather than cover it */
 .timerbar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--panel);
-  padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:40}
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:57}
 .timerbar.ring{background:var(--red)}
-.timerbar .t{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.02em;flex:1}
+.timerbar .t{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.02em;flex:1;
+  background:none;border:none;color:inherit;text-align:left;padding:0;min-height:44px;cursor:pointer}
+.timerbar .t:active{opacity:.6}
 .timerbar .lab{font-family:var(--disp);text-transform:uppercase;letter-spacing:.14em;font-size:12px;opacity:.8;display:block}
-.timerbar button{min-height:44px;padding:0 14px;background:transparent;border:1px solid rgba(242,241,236,.5);
+.timerbar button:not(.t){min-height:44px;padding:0 10px;background:transparent;border:1px solid rgba(242,241,236,.5);
   color:var(--panel);font-family:var(--disp);text-transform:uppercase;letter-spacing:.1em;font-size:13px;font-weight:600;cursor:pointer}
 .timerbar button:disabled{opacity:.35;cursor:default}
 .wkmini{position:fixed;left:0;right:0;bottom:0;z-index:35;background:var(--panel);border-top:2px solid var(--ink);
@@ -298,7 +320,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
     <div class="field"><label for="diI">Max dips</label><input id="diI" type="number" inputmode="numeric" step="1" value="10"></div>
     <div class="field"><label for="tgtI">Weekly NPL target</label><input id="tgtI" type="number" inputmode="numeric" step="10" value="140"></div>
     <div class="field"><label for="incI">Round to</label>
-      <select id="incI"><option value="2.5">2.5 kg</option><option value="1.25">1.25 kg</option><option value="5">5 kg</option></select></div>
+      <select id="incI"><option value="2.5">2.5 kg (1.25 a side)</option><option value="1.25">1.25 kg (small plates)</option></select></div>
     <button class="big" id="saveSetup">Save and open the library ›</button>
   </div>
 </section>
@@ -346,6 +368,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   </div>
   <div class="weeks" id="weeks" role="group" aria-label="Week"></div>
   <div class="days" id="days" role="group" aria-label="Day"></div>
+  <div id="sessBanner" class="hidden" role="status"></div>
   <p class="blocknote" id="progNote"></p>
   <div class="wclock" id="wClock">
     <span class="t" id="wTime">0:00</span>
@@ -356,10 +379,18 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   <div id="session"></div>
   <textarea id="sessNote" placeholder="Session notes — aches, bar speed, anything worth remembering" aria-label="Session notes"></textarea>
   <div class="presets" id="presets"></div>
-  <button class="big" id="finishBtn">Mark session complete</button>
+  <button class="big" id="finishBtn">Finish session</button>
   <div id="fbBox" class="hidden">
-    <p class="blocknote" id="fbLead">How did that sit? The next sessions scale from your answer.</p>
-    <div class="presets fb3" id="fbBtns"></div>
+    <div class="donehead">
+      <span class="donemark" aria-hidden="true">✓</span>
+      <div class="donetxt"><b>Session logged</b><span id="doneSum"></span></div>
+      <button type="button" id="undoBtn">Undo</button>
+    </div>
+    <div id="fbScale">
+      <p class="blocknote" id="fbLead"></p>
+      <div class="presets fb3" id="fbBtns"></div>
+    </div>
+    <p class="blocknote hidden" id="fbSettled"></p>
     <p class="blocknote">And how hard was it, 1–10? 1 is a walk, 10 is a funeral. Optional, but it sharpens the coach.</p>
     <div class="presets rpe" id="rpeBtns"></div>
   </div>
@@ -416,7 +447,7 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
     <div class="field"><label for="di2">Max dips</label><input id="di2" type="number" inputmode="numeric" step="1"></div>
     <div class="field"><label for="tgt2">Weekly NPL target</label><input id="tgt2" type="number" inputmode="numeric" step="10"></div>
     <div class="field"><label for="inc2">Round to</label>
-      <select id="inc2"><option value="2.5">2.5 kg</option><option value="1.25">1.25 kg</option><option value="5">5 kg</option></select></div>
+      <select id="inc2"><option value="2.5">2.5 kg (1.25 a side)</option><option value="1.25">1.25 kg (small plates)</option></select></div>
     <button class="big" id="saveMaxes">Save</button>
   </div>
   <div class="card">
@@ -445,6 +476,9 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
       <select id="themeSel"><option value="system">Follow the phone</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
     <div class="field"><label for="awakeSel">Hold screen awake</label>
       <select id="awakeSel"><option value="1">During rests</option><option value="0">Never</option></select></div>
+    <div class="field"><label for="notifSel">When a rest ends</label>
+      <select id="notifSel"><option value="0">Sound + vibration only</option><option value="1">Also send a notification</option></select></div>
+    <p class="lede" style="margin-top:2px">Notifications reach the lock screen when the app is on your Home Screen; the phone asks for permission the first time you switch this on. In a plain browser tab they may not appear — the Ring handoff below stays the bulletproof option.</p>
   </div>
   <div class="card">
     <h3>Ring through the lock screen</h3>
@@ -479,13 +513,13 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
 </main>
 
 <div class="timerbar hidden" id="timerBar">
-  <div><span class="lab" id="tLab">Rest</span><span class="t" id="tLeft">0:00</span></div>
-  <button id="tRing" disabled>Ring</button><button id="tPlus">+30 s</button><button id="tStop">Stop</button>
+  <div><span class="lab" id="tLab">Rest</span><button class="t" id="tLeft" type="button" title="Tap to set the time yourself">0:00</button></div>
+  <button id="tRing" disabled>Ring</button><button id="tMinus">−15</button><button id="tPlus">+15</button><button id="tStop">Stop</button>
 </div>
 
 <!-- set editor: opens when you tap an already-ticked set -->
 <div class="scrim hidden" id="scrim"></div>
-<div class="sheet hidden" id="sheet"><div class="inner">
+<div class="sheet hidden" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle"><div class="inner">
   <h3 id="shTitle"></h3>
   <p class="plates" id="shPlates"></p>
   <div id="shEdit">
@@ -495,6 +529,16 @@ p.lede{font-size:14.5px;color:var(--muted);margin:0 0 18px}
   </div>
   <button class="big ghost" id="shUntick">Untick this set</button>
   <button class="big ghost" id="shClose">Close</button>
+</div></div>
+
+<!-- rest countdown editor: opens when you tap the countdown itself -->
+<div class="sheet hidden" id="teSheet" role="dialog" aria-modal="true" aria-labelledby="teTitle"><div class="inner">
+  <h3 id="teTitle">Rest — set the countdown</h3>
+  <p class="plates" id="teCur"></p>
+  <div class="presets" id="tePresets" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="field" style="margin-top:14px"><label for="teSec">Exact seconds</label><input id="teSec" type="number" inputmode="numeric" step="5" placeholder="90"></div>
+  <button class="big" id="teApply">Set countdown</button>
+  <button class="big ghost" id="teClose">Close</button>
 </div></div>
 
 <!-- the workout clock keeps running when you leave the session; this is how you see and reach it -->
@@ -523,16 +567,17 @@ window.addEventListener("unhandledrejection", function(e){
   showDiag("Async: " + ((e.reason && e.reason.message) || e.reason));
 });
 
-const KEY = "training_hub_v1", OLD = "sheiko_hyper_v1", SCHEMA = 2;
+const KEY = "training_hub_v1", OLD = "sheiko_hyper_v1", SCHEMA = 4;
 const el = id => document.getElementById(id);
 
 /* ============ STATE ============ */
 let S = null, PROG = null, BUILT = null;
+let SAVEFAIL = false;              /* latch: warn once when storage refuses a write, not on every save */
 const blank = () => ({
-  v:SCHEMA, setup:false, oneRM:{squat:0,bench:0,dl:0}, kb:24, bag:12, row2k:450, pmax:8, dmax:10, run5k:1800, adj:{}, awake:true, ring:false, ringName:"Rest Timer",
+  v:SCHEMA, setup:false, oneRM:{squat:0,bench:0,dl:0}, kb:24, bag:12, row2k:450, pmax:8, dmax:10, run5k:1800, adj:{}, awake:true, ring:false, ringName:"Rest Timer", notif:false,
   target:140, inc:2.5, cycle:1, pos:{}, log:{}, history:[], rmLog:[], start:{}, lastExport:"",
   gh:{repo:"", token:"", auto:false}, mixSel:[], wk:null, coach:{auto:false, lastRun:"", log:[]},
-  rest:{}, bw:[], theme:"system", deload:{}
+  rest:{}, bw:[], theme:"system", deload:{}, pend:{}, mixDay:null, savedAt:0
 });
 /* Anything that arrives from storage or a restored backup is untrusted: one
    null field used to take the whole app down with it. Repair, never trust. */
@@ -548,12 +593,17 @@ function sane(o){
   o.pmax = Math.round(pos(o.pmax, 8)); o.dmax = Math.round(pos(o.dmax, 10));
   o.target = Math.round(pos(o.target, 140)); o.inc = pos(o.inc, 2.5);
   o.cycle = Math.max(1, Math.round(pos(o.cycle, 1)));
-  ["log","pos","adj","gh","coach","start","rest","deload"].forEach(k => {
+  ["log","pos","adj","gh","coach","start","rest","deload","pend"].forEach(k => {
     if(!o[k] || typeof o[k] !== "object" || Array.isArray(o[k])) o[k] = b[k];
   });
   ["history","rmLog","mixSel","bw"].forEach(k => { if(!Array.isArray(o[k])) o[k] = []; });
   o.theme = ["system","light","dark"].indexOf(o.theme) > -1 ? o.theme : "system";
+  o.notif = !!o.notif;
   Object.keys(o.rest).forEach(k => { if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) delete o.rest[k]; });
+  /* the calendar looks back 12 weeks and the coach 7 days — rest days older than
+     a year are dead weight in a state blob that is rewritten on every save */
+  const rk = Object.keys(o.rest).sort();
+  if(rk.length > 400) rk.slice(0, rk.length - 400).forEach(k => delete o.rest[k]);
   Object.keys(o.deload).forEach(k => {
     const v = o.deload[k];
     if(!v || typeof v !== "object" || !/^\d{4}-\d{2}-\d{2}$/.test(String(v.until))){ delete o.deload[k]; return; }
@@ -573,6 +623,17 @@ function sane(o){
     if(!/^\d{4}-\d{2}-\d{2}$/.test(String(o.start[k]))) delete o.start[k];
   });
   o.mixSel = o.mixSel.filter(x => typeof x === "string" && progById(x));
+  /* pending verdicts: only real programs, sane week/day ints, and only when the
+     record they point at is still logged-but-unanswered */
+  Object.keys(o.pend).forEach(k => {
+    const v = o.pend[k], p = progById(k);
+    if(!p || !v || typeof v !== "object" || !(v.w >= 1) || !(v.d >= 1)){ delete o.pend[k]; return; }
+    v.w = Math.round(v.w); v.d = Math.round(v.d);
+    /* slotKey reads the global S, which is null while sane() runs — build the key from o */
+    const kk = k === "sheiko" ? "sheiko|c" + (o.cycle || 1) + "|" + v.w + "|" + v.d : k + "|" + v.w + "|" + v.d;
+    const r = o.log[kk];
+    if(!r || !r.done || r.fb != null) delete o.pend[k];
+  });
   o.coach.log = Array.isArray(o.coach.log) ? o.coach.log.filter(x => x && typeof x === "object").slice(0, 60) : [];
   o.gh.repo = String(o.gh.repo || ""); o.gh.token = String(o.gh.token || "");
   Object.keys(o.adj).forEach(k => {
@@ -583,13 +644,36 @@ function sane(o){
     const r = o.log[k];
     if(!r || typeof r !== "object"){ delete o.log[k]; return; }
     if(!r.sets || typeof r.sets !== "object") r.sets = {};
+    /* accessory weights are numbers like everything else in this file; an empty
+       string used to survive here and keep an otherwise empty record alive */
     if(!r.acc || typeof r.acc !== "object") r.acc = {};
+    else Object.keys(r.acc).forEach(x => {
+      const n = parseFloat(r.acc[x]);
+      if(isFinite(n) && n > 0) r.acc[x] = n; else delete r.acc[x];
+    });
     if(r.reps && typeof r.reps !== "object") delete r.reps;
     if(r.rpe != null){ const n = Math.round(num(r.rpe, 0)); if(n < 1 || n > 10) delete r.rpe; else r.rpe = n; }
+    if(r.fb !== -1 && r.fb !== 0 && r.fb !== 1 && r.fb != null) delete r.fb;
+    if(r.fbp != null && !isFinite(+r.fbp)) delete r.fbp;
+    if(r.fba != null && !isFinite(+r.fba)) delete r.fba;
+    /* a garbage date used to flow into the coach's age maths and the calendar */
+    if(r.d0 != null && !/^\d{4}-\d{2}-\d{2}$/.test(String(r.d0))) delete r.d0;
+    if(r.fbd != null && !/^\d{4}-\d{2}-\d{2}$/.test(String(r.fbd))) delete r.fbd;
     if(r.dur != null) r.dur = num(r.dur, 0);
     if(r.dsh != null) r.dsh = Math.max(1, Math.round(num(r.dsh, 1)));
   });
   if(o.wk && !(typeof o.wk === "object" && isFinite(+o.wk.start))) o.wk = null;
+  /* what the mixer logged today, so a second tap lands on those sessions instead
+     of logging the next ones — only today's entry is ever meaningful */
+  const m = o.mixDay;
+  if(!m || typeof m !== "object" || Array.isArray(m) || !/^\d{4}-\d{2}-\d{2}$/.test(String(m.d)) ||
+     !m.ids || typeof m.ids !== "object" || Array.isArray(m.ids)) o.mixDay = null;
+  else Object.keys(m.ids).forEach(k => {
+    const v = m.ids[k];
+    if(!progById(k) || !v || typeof v !== "object" || !(v.w >= 1) || !(v.d >= 1)) delete m.ids[k];
+    else { v.w = Math.round(v.w); v.d = Math.round(v.d); }
+  });
+  o.savedAt = num(o.savedAt, 0);
   return o;
 }
 /* clamped: a stored position outside a program's range used to throw on every open */
@@ -610,34 +694,72 @@ async function save(){
   /* viewing a session creates its record; drop the ones nothing happened in */
   Object.keys(S.log).forEach(k => {
     const r = S.log[k];
-    if(!r.done && !r.note && !Object.keys(r.sets||{}).length && !Object.keys(r.acc||{}).length) delete S.log[k];
+    /* rpe belongs here too: the scale is offered before anything is ticked, so
+       an RPE on an otherwise untouched session was pruned the moment it was
+       set — and the toast still claimed it had been noted */
+    if(!r.done && !r.note && r.rpe == null &&
+       !Object.keys(r.sets||{}).length && !Object.keys(r.acc||{}).length) delete S.log[k];
   });
+  /* stamped so load() can tell the two copies apart when one write fails */
+  S.savedAt = Date.now();
   const raw = JSON.stringify(S);
-  try{ if(window.storage) await window.storage.set(KEY, raw); }catch(e){}
-  try{ localStorage.setItem(KEY, raw); }catch(e){}
+  let mirrorOk = false;
+  try{ if(window.storage){ await window.storage.set(KEY, raw); mirrorOk = true; } }catch(e){}
+  /* a full quota used to fail silently: the app looked fine while every change
+     after it was lost. Say so once — repeating it on every save is noise. */
+  let localOk = false;
+  try{ localStorage.setItem(KEY, raw); localOk = true; SAVEFAIL = false; }catch(e){}
+  if(!localOk && !(window.storage && mirrorOk) && !SAVEFAIL){
+    SAVEFAIL = true;
+    try{ toast("Storage is full — this change was not saved. Export JSON from Loads & data."); }catch(e2){}
+  }
 }
 async function load(){
-  try{ if(window.storage){ const r = await window.storage.get(KEY); if(r && r.value) return JSON.parse(r.value); } }catch(e){}
-  try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  let mirror = null, local = null;
+  try{ if(window.storage){ const r = await window.storage.get(KEY); if(r && r.value) mirror = JSON.parse(r.value); } }catch(e){}
+  try{ const raw = localStorage.getItem(KEY); if(raw) local = JSON.parse(raw); }catch(e){}
+  /* both copies are written on every save, but either write can fail on its own.
+     Preferring the mirror unconditionally meant a failed mirror write silently
+     resurrected an older state — take whichever was stamped last. */
+  if(mirror && local) return (+local.savedAt || 0) > (+mirror.savedAt || 0) ? local : mirror;
+  if(mirror || local) return mirror || local;
   try{ const old = localStorage.getItem(OLD); if(old){ const o = JSON.parse(old);
         return Object.assign(blank(), {v:1, oneRM:o.oneRM, target:o.target, inc:o.inc, cycle:o.cycle||1, setup:!!o.setup}); } }catch(e){}
   return null;
 }
+/* ticks come in bursts and the whole state is one JSON blob — coalesce the
+   writes, but never let one escape a backgrounded app (see the flush below). */
+let SAVET = null;
+function saveSoon(){
+  if(SAVET) return;
+  SAVET = setTimeout(() => { SAVET = null; save(); }, 400);
+}
+function saveFlush(){ if(SAVET){ clearTimeout(SAVET); SAVET = null; save(); } }
+window.addEventListener("pagehide", saveFlush);
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden") saveFlush(); });
 /* v1 → v2: the Sheiko day gained a warm-up block at index 0, so every stored
    set/rep id in a sheiko record shifts one block down; then any record from
    before rep-freezing gets its reps frozen once, so counters never rebuild. */
 function migrate(){
   if(S.v >= SCHEMA) return false;
-  Object.keys(S.log || {}).forEach(k => {
-    const r = S.log[k];
-    if(k.indexOf("sheiko|") === 0){
+  /* v2 gained a Sheiko warm-up block, v3 a rowing one — both inserted at block
+     index 0, so every stored set/rep id in that program shifts up one block */
+  const shiftBlocks = pred => {
+    Object.keys(S.log || {}).forEach(k => {
+      if(!pred(k)) return;
+      const r = S.log[k];
       ["sets","reps"].forEach(f => {
         const o = r[f]; if(!o) return;
         const m = {};
         Object.keys(o).forEach(x => { const p = x.split("-"); m[(+p[0]+1) + "-" + p[1]] = o[x]; });
         r[f] = m;
       });
-    }
+    });
+  };
+  if(S.v < 2) shiftBlocks(k => k.indexOf("sheiko|") === 0);
+  if(S.v < 3) shiftBlocks(k => k.indexOf("row|") === 0);
+  if(S.v < 2) Object.keys(S.log || {}).forEach(k => {
+    const r = S.log[k];
     if(!r.reps){
       const parts = k.split("|"), p = progById(parts[0]);
       const w = +parts[parts.length-2], d = +parts[parts.length-1];
@@ -650,6 +772,23 @@ function migrate(){
         }));
       }
     }
+  });
+  /* v3 → v4: accessory weights were keyed by item index alone, which collides the
+     moment a session carries two accessory blocks. Re-key them onto the same
+     "block-item" ids the ticks use. */
+  if(S.v < 4) Object.keys(S.log || {}).forEach(k => {
+    const r = S.log[k];
+    if(!r || !r.acc || !Object.keys(r.acc).length) return;
+    const parts = k.split("|"), p = progById(parts[0]);
+    const w = +parts[parts.length-2], d = +parts[parts.length-1];
+    let built = null; try{ built = p && p.build(w,d); }catch(e){}
+    if(!built) return;
+    let bi = -1;
+    built.blocks.forEach((b,i) => { if(bi < 0 && b.kind === "acc") bi = i; });
+    if(bi < 0) return;
+    const m = {};
+    Object.keys(r.acc).forEach(x => { m[/^\d+-\d+$/.test(x) ? x : bi + "-" + x] = r.acc[x]; });
+    r.acc = m;
   });
   S.v = SCHEMA;
   return true;
@@ -702,7 +841,9 @@ function scaleNote(id){
 }
 
 /* ============ UTIL ============ */
-const round = kg => { const i = S.inc || 2.5; return Math.round(kg / i) * i; };
+/* percentage prescriptions never round coarser than 2.5 kg (1.25 a side) —
+   at small 1RMs a 5 kg step collapses whole ladders (60% and 65% both → 50) */
+const round = kg => { const i = Math.min(S.inc || 2.5, 2.5); return Math.round(kg / i) * i; };
 const fmt = n => (Math.round(n*100)/100).toString();
 /* never render NaN at the user: a corrupt stored time reads as 0:00, not garbage */
 const secsOf = s => { const n = Math.round(+s); return isFinite(n) && n > 0 ? n : 0; };
@@ -787,6 +928,9 @@ function applyTheme(){
    api.github.com allows cross-origin calls from any page. */
 const GH_PATH = "backups/training-hub-data.json";
 function ghCfg(){ S.gh = S.gh || {repo:"", token:"", auto:false}; return S.gh; }
+/* owner/name and nothing else: a stray space breaks the fetch and a "../" would
+   point the contents API somewhere entirely different */
+const ghValid = r => /^[\w.-]+\/[\w.-]+$/.test(String(r || ""));
 function ghHdr(g){ return {"Authorization":"Bearer " + g.token, "Accept":"application/vnd.github+json"}; }
 function ghUrl(g){ return "https://api.github.com/repos/" + g.repo + "/contents/" + GH_PATH; }
 function b64utf8(str){
@@ -805,6 +949,7 @@ function ghErr(status){
 async function ghBackup(silent){
   const g = ghCfg();
   if(!g.repo || !g.token){ if(!silent) toast("Fill in repo and token first"); return false; }
+  if(!ghValid(g.repo)){ if(!silent) toast("Repo should read owner/name"); return false; }
   try{
     let sha = null;
     const cur = await fetch(ghUrl(g), {headers:ghHdr(g)});
@@ -825,6 +970,7 @@ async function ghBackup(silent){
 async function ghRestore(){
   const g = ghCfg();
   if(!g.repo || !g.token){ toast("Fill in repo and token first"); return; }
+  if(!ghValid(g.repo)){ toast("Repo should read owner/name"); return; }
   if(!confirm("Replace everything on this device with the latest GitHub backup?")) return;
   try{
     const res = await fetch(ghUrl(g), {headers:ghHdr(g)});
@@ -842,6 +988,45 @@ async function ghRestore(){
     save(); renderLibrary(); show("library"); toast("Restored from GitHub ✓");
   }catch(e){ toast("Restore failed: " + ((e && e.message) || "network")); }
 }
+
+/* ============ MODAL SHEETS ============
+   Both sheets are real dialogs: the scrim is not a substitute for telling a
+   screen reader what is going on, and Escape is what every keyboard expects. */
+let LASTFOCUS = null;
+const sheetOpen = () => !el("sheet").classList.contains("hidden") ? el("sheet")
+                      : !el("teSheet").classList.contains("hidden") ? el("teSheet") : null;
+const sheetFields = node => Array.prototype.filter.call(
+  node.querySelectorAll("button, input, select, textarea"),
+  x => !x.disabled && !(x.closest(".hidden") && x.closest(".hidden") !== node));
+function openModal(node){
+  LASTFOCUS = document.activeElement;
+  /* the rest bar now sits ABOVE the scrim so it stays usable — lift the sheet
+     clear of it instead of covering it (its height varies with the safe area) */
+  const bar = el("timerBar");
+  const h = bar.classList.contains("hidden") ? 0 : bar.offsetHeight;
+  node.style.bottom = h ? h + "px" : "";
+  el("scrim").classList.remove("hidden"); node.classList.remove("hidden");
+  const f = sheetFields(node)[0];
+  try{ if(f) f.focus(); }catch(e){}
+}
+function closeModal(node){
+  node.classList.add("hidden");
+  /* only the last sheet standing takes the scrim down with it */
+  if(!sheetOpen()) el("scrim").classList.add("hidden");
+  try{ if(LASTFOCUS && LASTFOCUS.focus) LASTFOCUS.focus(); }catch(e){}
+  LASTFOCUS = null;
+}
+document.addEventListener("keydown", e => {
+  const open = sheetOpen();
+  if(!open) return;
+  if(e.key === "Escape"){ e.preventDefault(); open === el("sheet") ? closeSheet() : closeTe(); return; }
+  if(e.key !== "Tab") return;
+  const f = sheetFields(open);
+  if(!f.length) return;
+  const first = f[0], last = f[f.length-1];
+  if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
 
 /* ============ REST TIMER ============ */
 let TM = {end:0, iv:null, len:0};
@@ -882,6 +1067,12 @@ function keepAlive(on){
    page cannot do on its own. */
 function handoff(sec){
   const n = Math.max(1, Math.round(sec));
+  /* the shortcuts:// scheme only exists on Apple devices — elsewhere a tap
+     would navigate to an unknown scheme and, in some webviews, an error page.
+     (Recent iPads report as "MacIntel" with touch, so test that too.) */
+  const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if(!apple){ toast("Ring hands the countdown to the iPhone Clock app — this device just uses the on-screen timer"); return; }
   location.href = "shortcuts://run-shortcut?name=" + encodeURIComponent(S.ringName || "Rest Timer") +
                   "&input=text&text=" + n;
 }
@@ -890,12 +1081,28 @@ function startTimer(sec, label){
   try{ AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if(AC.state === "suspended") AC.resume(); }catch(e){}
   keepAlive(true); wake(true);
   if(S.ring) handoff(sec);
-  TM.len = sec; TM.end = Date.now() + sec*1000;
+  TM.len = sec; TM.end = Date.now() + sec*1000; TM.label = label || "Rest";
   el("tLab").textContent = label || "Rest";
   el("tRing").disabled = false;
   el("timerBar").classList.remove("hidden","ring");
   clearInterval(TM.iv);
   TM.iv = setInterval(tick, 200); tick(); renderClock();
+}
+/* the banner says it ended — but if the phone was in your pocket, sound is not
+   enough. A real notification (granted from settings) reaches the lock screen. */
+function notifyRest(){
+  if(!S.notif || !("Notification" in window) || Notification.permission !== "granted") return;
+  const title = "Rest over — " + (TM.label || "back to work"), opts = {body:"Time's up. Back on the bar.", tag:"rest-timer", renotify:true, silent:false};
+  const direct = () => { try{ new Notification(title, opts); }catch(e){} };
+  try{
+    /* serviceWorker.ready NEVER settles when no worker controls this page —
+       waiting on it silently swallowed the notification. controller tells us. */
+    if(navigator.serviceWorker && navigator.serviceWorker.controller)
+      navigator.serviceWorker.ready
+        .then(r => r.showNotification(title, opts))
+        .catch(direct);
+    else direct();
+  }catch(e){}
 }
 function tick(){
   const left = (TM.end - Date.now())/1000;
@@ -906,6 +1113,7 @@ function tick(){
     el("tRing").disabled = true;
     el("tLeft").textContent = "0:00"; el("tLab").textContent = "Go";
     beep(); if(navigator.vibrate) navigator.vibrate([200,80,200]);
+    notifyRest();
     keepAlive(false); wake(false);
     setTimeout(()=>{ if(!TM.iv){ el("timerBar").classList.add("hidden"); renderClock(); } }, 6000);
   }
@@ -916,10 +1124,61 @@ document.addEventListener("visibilitychange", () => {
   if(document.visibilityState === "visible" && TM.iv){ wake(true); tick(); }
 });
 el("tRing").onclick = () => handoff(Math.max(1,(TM.end - Date.now())/1000));
-el("tPlus").onclick = () => { TM.end += 30000; el("timerBar").classList.remove("ring");
+/* the countdown is yours while it runs: ±15 s quick steps, or tap the clock
+   itself and set exactly what you want — even after it already rang */
+function tRevive(){
+  el("timerBar").classList.remove("ring");
   el("tRing").disabled = false;
-  if(el("tLab").textContent === "Go") el("tLab").textContent = "Rest";   /* ringing state said "Go" — a resumed countdown isn't */
-  if(!TM.iv) TM.iv = setInterval(tick,200); tick(); };
+  if(el("tLab").textContent === "Go") el("tLab").textContent = TM.label || "Rest";
+  if(!TM.iv) TM.iv = setInterval(tick,200); tick();
+}
+function tAdj(delta){
+  TM.end = Math.max(Date.now(), TM.end + delta*1000);
+  tRevive();
+}
+el("tMinus").onclick = () => tAdj(-15);
+el("tPlus").onclick = () => tAdj(15);
+/* the countdown editor sheet: presets for the common rests, exact seconds for
+   anything else. A panel, not a prompt() — prompts are blocked in some embedded
+   webviews and can't show presets */
+el("tLeft").onclick = () => {
+  const cur = Math.max(0, Math.round((TM.end - Date.now())/1000));
+  el("teSec").value = cur;
+  el("teCur").textContent = "Right now: " + mmss(cur) + " left";
+  const pres = el("tePresets"); pres.innerHTML = "";
+  [30,45,60,90,120,180,240,300].forEach(s => {
+    const b = document.createElement("button"); b.type = "button";
+    b.textContent = mmss(s);
+    b.onclick = () => tEditApply(s);
+    pres.appendChild(b);
+  });
+  openModal(el("teSheet"));
+};
+function closeTe(){ closeModal(el("teSheet")); }
+function tEditApply(s){
+  s = Math.round(+s);
+  if(!isFinite(s) || s < 0){ toast("Type the seconds, or tap a preset"); return; }
+  TM.end = Date.now() + s*1000;
+  tRevive();
+  closeTe();
+  toast(s ? "Rest set to " + mmss(s) : "Rest ended");
+}
+el("teApply").onclick = () => tEditApply(el("teSec").value);
+el("teSec").onkeydown = e => { if(e.key === "Enter") tEditApply(el("teSec").value); };
+el("teClose").onclick = closeTe;
+
+/* ============ MIXER LEDGER ============
+   advance() moves every included program PAST the session the mixer just logged,
+   so "is the current session already done?" can never catch a second tap — it
+   asks about the next one, which is legitimately not done. This remembers what
+   today's mixer actually logged, and the clock later stamps its time there. */
+function mixDay(){
+  if(!S.mixDay || S.mixDay.d !== todayISO()) S.mixDay = {d:todayISO(), ids:{}};
+  return S.mixDay;
+}
+function mixLoggedToday(){
+  return (S.mixDay && S.mixDay.d === todayISO() && S.mixDay.ids) ? S.mixDay.ids : {};
+}
 
 /* ============ WORKOUT CLOCK ============
    Timestamp-based like the rest timer: locking the phone or reloading
@@ -966,9 +1225,13 @@ function finishWorkout(secs){
   if(PROG.mixer){
     const sel = (S.mixSel || []).filter(id => { const p = progById(id); return p && !p.mixer; });
     if(!sel.length){ toast("Workout " + hhmmss(secs) + " — nothing selected to log"); save(); return; }
+    const md = mixDay();
     let n = 0;
     sel.forEach(id => {
-      const p = progById(id), ppos = posOf(id), rr = rec(id, ppos.w, ppos.d), kk = slotKey(id, ppos.w, ppos.d);
+      /* the clock's time belongs to the session this mixer actually logged today —
+         after advance() the pointer sits on the NEXT one, which never happened */
+      const p = progById(id), ppos = md.ids[id] || posOf(id);
+      const rr = rec(id, ppos.w, ppos.d), kk = slotKey(id, ppos.w, ppos.d);
       /* one clock covers them all: dsh lets the load model split it, not multiply it */
       rr.dur = secs; rr.dsh = sel.length;
       if(rr.done){
@@ -978,18 +1241,26 @@ function finishWorkout(secs){
         return;
       }
       rr.done = true; rr.d0 = rr.d0 || todayISO(); n++;
+      md.ids[id] = {w:ppos.w, d:ppos.d};
       S.history.unshift({d:todayISO(), p:p.name, w:ppos.w, day:ppos.d, k:kk, t:secs});
+      S.pend = S.pend || {}; S.pend[id] = {w:ppos.w, d:ppos.d};
+      advance(id);
     });
     S.history = S.history.slice(0,80);
     toast("Workout " + hhmmss(secs) + (n ? " — logged " + n + (n === 1 ? " session" : " sessions") : ""));
   } else {
     const pos = posOf(PROG.id), r = rec(PROG.id, pos.w, pos.d), k = slotKey(PROG.id, pos.w, pos.d);
     r.dur = secs;
+    /* this clock covered one session — a dsh left over from a mixer day would
+       keep dividing its load by three forever */
+    delete r.dsh;
     if(!r.done){
       r.done = true; r.d0 = r.d0 || todayISO();
       S.history.unshift({d:todayISO(), p:PROG.name, w:pos.w, day:pos.d, k:k, t:secs});
       S.history = S.history.slice(0,80);
-      toast("Workout " + hhmmss(secs) + " — session logged");
+      S.pend = S.pend || {}; S.pend[PROG.id] = {w:pos.w, d:pos.d};
+      const moved = advance(PROG.id);
+      toast("Workout " + hhmmss(secs) + " — logged" + (moved ? ", on to the next session" : ""));
     } else {
       const h = S.history.find(x => x.k === k);
       if(h) h.t = secs;
@@ -1120,7 +1391,9 @@ function ssSession(){
 
 function ropSession(w,d){
   /* weeks 6+ deepen the ladders instead of adding more of them */
-  const rungs = (w >= 6 ? [4,5,6] : [3,4,5])[d-1], ladders = Math.max(2, Math.min(5, 2 + w) + step("rop"));
+  /* the scale goes INSIDE the cap: applied after it, a 110% dial pushed the
+     ladders past the ceiling exactly in the weeks that are already the heaviest */
+  const rungs = (w >= 6 ? [4,5,6] : [3,4,5])[d-1], ladders = Math.max(2, Math.min(5, 2 + w + step("rop")));
   const names = ["Light day","Medium day","Heavy day"], items = [];
   for(let L=1;L<=ladders;L++)
     for(let r=1;r<=rungs;r++)
@@ -1141,7 +1414,7 @@ const BAGC = {
 };
 function bagSession(w,d){
   /* weeks 1–4 identical to before ([3,4,4,5] rounds, 45 s from week 4); then denser and longer */
-  const c = BAGC[d], rounds = Math.max(2, Math.min(6, 3 + Math.floor(w/2)) + step("bag")), work = w >= 7 ? 50 : w >= 4 ? 45 : 40, items = [];
+  const c = BAGC[d], rounds = Math.max(2, Math.min(6, 3 + Math.floor(w/2) + step("bag"))), work = w >= 7 ? 50 : w >= 4 ? 45 : 40, items = [];
   for(let r=1;r<=rounds;r++){
     c.x.forEach(x => items.push({label:x, sub:work + " s work · 20 s rest", rest:20}));
     items.push({label:"Round " + r + " done", sub:"90 s rest", rest:90});
@@ -1171,37 +1444,64 @@ function kimuraSession(w,d){
               {label:"30 s", sub:"towel grip hang", rest:60},{label:"30 s", sub:"towel grip hang", rest:60},{label:"30 s", sub:"towel grip hang", rest:60}]}]};
 }
 
+/* day shapes: threshold repeats (n × dist), segmented steady rows (seg —
+   each segment its own chip and stroke rate, so a 60-minute row is seven
+   decisions, not one slog), pyramids and ladders (rungs), sprint sets */
 const ROW = {
-1:{1:{t:"4 × 1000 m @ threshold", z:"AT", n:4, dist:"1000 m", rest:180},
-   2:{t:"40 min steady", z:"UT2", n:1, dist:"40 min", rest:0},
-   3:{t:"8 × 500 m @ VO2", z:"TR", n:8, dist:"500 m", rest:90}},
-2:{1:{t:"5 × 1000 m @ threshold", z:"AT", n:5, dist:"1000 m", rest:180},
-   2:{t:"50 min steady", z:"UT2", n:1, dist:"50 min", rest:0},
-   3:{t:"6 × 750 m @ VO2", z:"TR", n:6, dist:"750 m", rest:120}},
-3:{1:{t:"3 × 2000 m @ threshold", z:"AT", n:3, dist:"2000 m", rest:300},
-   2:{t:"60 min steady", z:"UT2", n:1, dist:"60 min", rest:0},
-   3:{t:"10 × 250 m sprint", z:"AN", n:10, dist:"250 m", rest:90}},
-4:{1:{t:"4 × 1500 m @ threshold", z:"AT", n:4, dist:"1500 m", rest:240},
-   2:{t:"45 min steady", z:"UT2", n:1, dist:"45 min", rest:0},
+1:{1:{t:"4 × 1000 m", z:"AT", n:4, dist:"1000 m", rest:180},
+   2:{t:"40 min steady — 4 segments", z:"UT2", seg:[[10,"r18–20"],[10,"r20–22"],[10,"r20"],[10,"r18"]]},
+   3:{t:"8 × 500 m", z:"TR", n:8, dist:"500 m", rest:90}},
+2:{1:{t:"5 × 1000 m", z:"AT", n:5, dist:"1000 m", rest:180},
+   2:{t:"50 min steady — 5 segments", z:"UT2", seg:[[10,"r18–20"],[10,"r20–22"],[10,"r22"],[10,"r20"],[10,"r18"]]},
+   3:{t:"Pyramid 250 → 1000 → 250", z:"TR", rungs:[["250 m",60],["500 m",75],["750 m",90],["1000 m",120],["750 m",90],["500 m",75],["250 m",0]]}},
+3:{1:{t:"3 × 2000 m", z:"AT", n:3, dist:"2000 m", rest:300},
+   2:{t:"60 min steady — 6 segments", z:"UT2", seg:[[10,"r18–20"],[10,"r20"],[10,"r22"],[10,"r20–22"],[10,"r20"],[10,"r18"]]},
+   3:{t:"10 × 250 m sprint", z:"AN", n:10, dist:"250 m", rest:90,
+      fin:[["6", "power strokes — legs only, full slide recovery", 60]]}},
+4:{1:{t:"4 × 1500 m", z:"AT", n:4, dist:"1500 m", rest:240},
+   2:{t:"45 min steady — 3 segments", z:"UT2", seg:[[15,"r18–20"],[15,"r20–22"],[15,"r18"]]},
    3:{t:"12 × 250 m sprint", z:"AN", n:12, dist:"250 m", rest:90}},
-5:{1:{t:"6 × 1000 m @ threshold", z:"AT", n:6, dist:"1000 m", rest:180},
-   2:{t:"70 min steady", z:"UT2", n:1, dist:"70 min", rest:0},
-   3:{t:"5 × 750 m @ VO2", z:"TR", n:5, dist:"750 m", rest:120}},
-6:{1:{t:"30 min steady", z:"UT2", n:1, dist:"30 min", rest:0},
+5:{1:{t:"6 × 1000 m", z:"AT", n:6, dist:"1000 m", rest:180},
+   2:{t:"70 min steady — 7 segments", z:"UT2", seg:[[10,"r18–20"],[10,"r20"],[10,"r22"],[10,"r20–22"],[10,"r22"],[10,"r20"],[10,"r18"]]},
+   3:{t:"Ladder 500 → 1000 → 500", z:"TR", rungs:[["500 m",75],["750 m",90],["1000 m",120],["1000 m",120],["750 m",90],["500 m",0]]}},
+6:{1:{t:"30 min easy — 3 segments", z:"UT2", seg:[[10,"r18"],[10,"r20"],[10,"r18"]]},
    2:{t:"4 × 500 m sharpener", z:"TR", n:4, dist:"500 m", rest:120},
    3:{t:"2000 m test", z:"2k", n:1, dist:"2000 m", rest:0}}
 };
 const ZONE = {UT2:22, UT1:16, AT:9, TR:5, AN:-1, "2k":0};
 const ZONENAME = {UT2:"easy aerobic",UT1:"steady",AT:"threshold",TR:"VO2",AN:"anaerobic","2k":"all out"};
+const ROWRATE = {UT2:"r18–22", UT1:"r20–22", AT:"r24–26", TR:"r26–30", AN:"r30 +", "2k":"r32–36"};
 function rowSession(w,d){
   /* the 6-week wave repeats; the 2000 m test at each wave's end resets your splits */
   const wave = Math.floor((w-1)/6);
-  const s = ROW[((w-1)%6)+1][d], base = (S.row2k || 450)/4, split = base + (ZONE[s.z] || 0) + (1 - A("row"))*40, items = [];
-  const reps = Math.max(1, Math.round(s.n * A("row")));
-  for(let i=1;i<=reps;i++) items.push({label:s.dist, sub:mmss(split) + " / 500 m", rest:s.rest});
-  return {title:(reps !== s.n ? reps + " × " + s.dist : s.t),
-    note:scaleNote("row") + (wave ? "Wave " + (wave+1) + " — after each 2000 m test, update your time in settings and every split below tightens itself. " : "") + "Target split " + mmss(split) + " per 500 m (" + ZONENAME[s.z] + ", from a " + mmss(S.row2k) + " 2 k). Rate 20–22 for steady work, 26–30 for the intervals. Keep this away from heavy squat days.",
-    blocks:[{n:"Pieces", note:"", kind:"sets", items:items}]};
+  const s = ROW[((w-1)%6)+1][d], base = (S.row2k || 450)/4, split = base + (ZONE[s.z] || 0) + (1 - A("row"))*40;
+  const warm = [
+    {label:"8 min", sub:"row-in easy, r16–18 — long and loose", rest:0},
+    {label:"3 × 10", sub:"pick drill — arms, arms+body, full slide", rest:0},
+    {label:"3 × 10", sub:"legs-only strokes, arms straight", rest:0},
+    {label:"3 × 20 s", sub:"build to " + ZONENAME[s.z] + " pace", rest:40}];
+  const main = [], paceTxt = () => mmss(split) + " /500 m";
+  if(s.seg){
+    s.seg.forEach(x => main.push({label:x[0] + " min", sub:paceTxt() + " · " + x[1], rest:0}));
+  } else if(s.rungs){
+    s.rungs.forEach(x => main.push({label:x[0], sub:paceTxt() + " · " + ROWRATE[s.z], rest:x[1]}));
+  } else {
+    const reps = Math.max(1, Math.round(s.n * A("row")));
+    for(let i=1;i<=reps;i++) main.push({label:s.dist, sub:paceTxt() + " · " + ROWRATE[s.z], rest:s.rest});
+  }
+  const blocks = [
+    {n:"Warm-up & drills", note:"Quality pieces on cold legs are how backs go. Ten minutes here buys the whole session.", kind:"sets", items:warm},
+    {n:"Main set", note:"", kind:"sets", items:main}];
+  if(s.fin) blocks.push({n:"Finisher", note:"", kind:"sets",
+    items:s.fin.map(f => ({label:f[0], sub:f[1], rest:f[2]}))});
+  blocks.push({n:"Cool-down", note:"", kind:"sets",
+    items:[{label:"5 min", sub:"paddle easy, r16 — let the heart rate come all the way down", rest:0}]});
+  const reps = s.n && !s.seg && !s.rungs ? Math.max(1, Math.round(s.n * A("row"))) : 0;
+  return {title:(reps && reps !== s.n ? reps + " × " + s.dist : s.t),
+    note:scaleNote("row") + (wave ? "Wave " + (wave+1) + " — after each 2000 m test, update your time in settings and every split below tightens itself. " : "") +
+      "Target " + paceTxt() + " (" + ZONENAME[s.z] + ", from a " + mmss(S.row2k) + " 2 k), stroke rate " + ROWRATE[s.z] +
+      ". Damper 4–6, not 10 — the lever is gears, not difficulty. Keep this away from heavy squat days.",
+    blocks:blocks};
 }
 
 
@@ -1452,8 +1752,53 @@ function runSession(w,d){
     blocks:blocks};
 }
 
+/* ---------- ARMS (biceps focus, built around what a grappler already owns) ---------- */
+function armsSession(w,d){
+  const sp = step("arms");
+  if(d === 1){
+    /* heavy day: supinated chin-ups lead — the one biceps move you cannot cheat,
+       scaled off your pull-up max so it never asks for a rep you don't have */
+    const cr = Math.max(2, Math.min(S.pmax - 1, Math.round(S.pmax*0.55) + Math.floor((w-1)/2) + sp));
+    const cs = Math.max(3, Math.min(6, 4 + sp));
+    const crep = Math.max(5, 8 - Math.floor((w-1)/3));
+    const ch = [], bc = [], hc = [], tri = [], grip = [];
+    for(let i=1;i<=cs;i++) ch.push({label:"× " + cr, sub:"chin-up — palms to you, full hang", reps:cr, rest:120});
+    for(let i=1;i<=4;i++) bc.push({label:"× " + crep, sub:"barbell curl — strict, 2 s lower", reps:crep, rest:90});
+    for(let i=1;i<=3;i++){ hc.push({label:"× 10", sub:"hammer curl with the bell — left", reps:10, rest:60});
+                           hc.push({label:"× 10", sub:"hammer curl with the bell — right", reps:10, rest:60}); }
+    for(let i=1;i<=3;i++) tri.push({label:"× 12", sub:"close-grip push-up", reps:12, rest:60});
+    for(let i=1;i<=2;i++) grip.push({label:"20 s", sub:"towel hang", rest:45});
+    return {title:"Heavy · chin-ups & curls",
+      note:scaleNote("arms") + "Biceps grow from the stretch and the squeeze, not from the swing. Chin-ups lead because fresh arms together beat tired curls. Pick a curl weight you could lift twice more — tap a done set to log what you actually used.",
+      blocks:[
+        {n:"Chin-ups", note:"Stop each set one rep before the grind.", kind:"sets", items:ch},
+        {n:"Barbell curl", note:"Elbows pinned to your ribs. If the hips move, the bar is too heavy.", kind:"sets", items:bc},
+        {n:"Hammer curl", note:S.kb + " kg bell by the handle, neutral grip — the brachialis feeds your pull too.", kind:"sets", items:hc},
+        {n:"Triceps balance", note:"Biceps get the focus; the elbow needs its other side trained.", kind:"sets", items:tri},
+        {n:"Grip", note:"", kind:"sets", items:grip}]};
+  }
+  /* volume day: pump work and holds — light enough to recover from before judo */
+  const r21 = Math.max(2, Math.min(5, 3 + Math.floor((w-1)/3) + sp));
+  const t21 = [], iso = [], ecc = [], dia = [], rev = [], farm = [];
+  for(let i=1;i<=r21;i++) t21.push({label:"21", sub:"7 low + 7 high + 7 full curls, light bar", reps:21, rest:90});
+  for(let i=1;i<=3;i++) iso.push({label:"15 s", sub:"chin-up top hold — chin over the bar", rest:60});
+  for(let i=1;i<=4;i++) ecc.push({label:"× 5", sub:"curl, 5 s lowering — about 60% of heavy-day weight", reps:5, rest:75});
+  for(let i=1;i<=3;i++) dia.push({label:"× 12", sub:"diamond push-up", reps:12, rest:60});
+  for(let i=1;i<=3;i++) rev.push({label:"× 10", sub:"reverse-grip curl — forearms & brachialis", reps:10, rest:60});
+  for(let i=1;i<=2;i++) farm.push({label:"30 s", sub:"farmer hold — " + S.kb + " kg", rest:45});
+  return {title:"Volume · pump & holds",
+    note:scaleNote("arms") + "Short rests, light loads, no failed reps — end this day fresher than you started it. Keep it away from the day before judo: pumped biceps grip like bricks.",
+    blocks:[
+      {n:"21s", note:"Old school because it works — no swinging the light bar.", kind:"sets", items:t21},
+      {n:"Top holds", note:"", kind:"sets", items:iso},
+      {n:"Slow eccentrics", note:"", kind:"sets", items:ecc},
+      {n:"Diamond push-ups", note:"", kind:"sets", items:dia},
+      {n:"Reverse curls", note:"", kind:"sets", items:rev},
+      {n:"Farmer holds", note:"", kind:"sets", items:farm}]};
+}
+
 /* ---------- SESSION MIXER: stack blocks from any programs ---------- */
-const MIXSHORT = {sheiko:"Sheiko", "531":"5/3/1", kimura:"Kimura", swing:"Swings", ss:"S&S", rop:"RoP", complex:"Complex", pull:"Ladders", hero:"Hero", legs:"Legs", bag:"Bag", row:"Row", box:"Boxing", run:"Run"};
+const MIXSHORT = {sheiko:"Sheiko", "531":"5/3/1", kimura:"Kimura", swing:"Swings", ss:"S&S", rop:"RoP", complex:"Complex", pull:"Ladders", hero:"Hero", legs:"Legs", arms:"Arms", bag:"Bag", row:"Row", box:"Boxing", run:"Run"};
 function mixSession(){
   const sel = (S.mixSel || []).filter(id => { const p = progById(id); return p && !p.mixer; });
   const blocks = [], names = [];
@@ -1467,7 +1812,7 @@ function mixSession(){
   });
   return {title:names.length ? names.join(" + ") : "Pick your blocks",
     note:names.length
-      ? "Each block is that program's current session. Ticks land in the source program — NPL, odometer, day counters and history all stay in sync. Open a program on its own to give feedback and advance it."
+      ? "Each block is that program's current session. Ticks land in the source program — NPL, odometer, day counters and history all stay in sync, and logging here moves each program on. Open a program on its own to give the verdict that scales it."
       : "Tap programs below to stack their current sessions into one workout. Sheiko plus Kimura push-ups, swings after a row — your call.",
     blocks:blocks};
 }
@@ -1487,10 +1832,12 @@ const PROGS = [
  {id:"legs", g:"D", name:"Unweighted Legs", tag:"Pistol & Nordic progressions · 8 weeks × 2 days", weeks:8, days:2, build:legsSession,
   dayName:d => ["Squat","Hinge"][d-1]},
  {id:"hero", g:"D", name:"Benchmark Challenges", tag:"Murph, Cindy, Angie, Barbara and six more", weeks:1, days:10, build:heroSession, dayName:d => HERO[d-1].n},
+ {id:"arms", g:"D", name:"Arms — Biceps Focus", tag:"Chin-ups, curls & grip · 8 weeks × 2 days", weeks:8, days:2, build:armsSession, hot:true,
+  dayName:d => ["Heavy","Volume"][d-1]},
  {id:"bag", g:"C", name:"Bulgarian Bag", tag:"4 circuits · 40 / 20 · 8 weeks", weeks:8, days:4, build:bagSession},
  {id:"box", g:"C", name:"Boxing Engine", tag:"3-minute rounds & intervals · 8 weeks × 3 days", weeks:8, days:3, build:boxSession,
   dayName:d => ["Aerobic","Interval","Power"][d-1]},
- {id:"row", g:"C", name:"Indoor Rowing", tag:"Split-based · 12 weeks × 3 days", weeks:12, days:3, build:rowSession},
+ {id:"row", g:"C", name:"Indoor Rowing", tag:"Splits, drills & pyramids · 12 weeks × 3 days", weeks:12, days:3, build:rowSession},
  {id:"run", g:"E", name:"Run Coach", tag:"5 km to marathon · 24 weeks × 5 days", weeks:24, days:5, build:runSession, hot:true, paced:true,
   dayName:d => ["Easy","Work","Recov","Long","Cross"][d-1]}
 ];
@@ -1561,7 +1908,7 @@ function dayDone(p,w,d){
    much of the session you completed. Acute (7 d) against chronic (28 d mean)
    is the familiar acute:chronic ratio — a rule of thumb for spotting spikes,
    not a diagnosis, and it says nothing about sleep, work stress or a rota. */
-const COACH_INT = {sheiko:7, "531":8, kimura:6, swing:8, ss:5, rop:7, complex:7, pull:6, hero:9, legs:6, bag:8, box:7, row:7, run:5};
+const COACH_INT = {sheiko:7, "531":8, kimura:6, swing:8, ss:5, rop:7, complex:7, pull:6, hero:9, legs:6, arms:5, bag:8, box:7, row:7, run:5};
 const ROW_INT = {UT2:4, UT1:5, AT:7, TR:9, AN:9, "2k":10};
 /* Percentage work tells you its own intensity. A deload week at 60% counted
    the same as a heavy week at 85% while this was a constant; now the ticked
@@ -1719,15 +2066,38 @@ function adjustedToday(id){
   const c = S.coach || {};
   return !!(c.today && c.today.d === todayISO() && c.today.ids && c.today.ids[id]);
 }
+/* what the last adjBy actually did, so the caller can say it out loud */
+let LASTMOVE = null;
 function adjBy(id,delta,force){
+  LASTMOVE = null;
   if(!force && adjustedToday(id)) return 0;
-  const p = progById(id), next = Math.round(Math.max(0.80, Math.min(1.15, A(id) + delta)) * 1000)/1000;
+  const p = progById(id), name = p ? p.name : id;
+  const clamp = v => Math.round(Math.max(0.80, Math.min(1.15, v)) * 1000)/1000;
+  const claim = () => {
+    const c = S.coach = S.coach || {auto:false, lastRun:"", log:[]};
+    if(!c.today || c.today.d !== todayISO()) c.today = {d:todayISO(), ids:{}};
+    c.today.ids[id] = 1;
+  };
+  /* a declared deload OWNS adj until it expires — writing there was silently
+     undone by expireDeloads(), which restores prev. Move the baseline the
+     program comes back to instead, so the change survives the easy week. */
+  const dl = (S.deload || {})[id];
+  if(dl){
+    const base = (typeof dl.prev === "number" && dl.prev > 0) ? dl.prev : 1;
+    const next = clamp(base + delta);
+    if(Math.abs(next - base) < 0.001) return 0;
+    dl.prev = next;
+    claim();
+    LASTMOVE = {id:id, pct:Math.round(next*100), deferred:true};
+    coachNote((delta < 0 ? "Scaled " : "Nudged ") + name + " to " + Math.round(next*100) + "% — starts when the deload ends " + dl.until);
+    return next;
+  }
+  const next = clamp(A(id) + delta);
   if(Math.abs(next - A(id)) < 0.001) return 0;
   S.adj[id] = next;
-  const c = S.coach = S.coach || {auto:false, lastRun:"", log:[]};
-  if(!c.today || c.today.d !== todayISO()) c.today = {d:todayISO(), ids:{}};
-  c.today.ids[id] = 1;
-  coachNote((delta < 0 ? "Scaled " : "Nudged ") + (p ? p.name : id) + " to " + Math.round(next*100) + "%");
+  claim();
+  LASTMOVE = {id:id, pct:Math.round(next*100), deferred:false};
+  coachNote((delta < 0 ? "Scaled " : "Nudged ") + name + " to " + Math.round(next*100) + "%");
   return next;
 }
 /* move the program carrying most of this week's load — that's the lever */
@@ -1889,7 +2259,8 @@ function renderTally(){
   const tgt = pos.w === 4 ? Math.round(S.target*0.7) : S.target;
   el("nplNow").textContent = npl; el("nplTgt").textContent = tgt;
   const box = el("strokes"); box.innerHTML = "";
-  const total = Math.max(npl, tgt), frag = document.createDocumentFragment();
+  /* a corrupt frozen-reps count must not flood the DOM with thousands of strokes */
+  const total = Math.min(400, Math.max(npl, tgt)), frag = document.createDocumentFragment();
   for(let i=0;i<total;i++){
     const s = document.createElement("i");
     s.className = "stroke" + (i >= npl ? " ghost" : "") + ((i+1)%5 === 0 ? " gap" : "");
@@ -1918,7 +2289,7 @@ function renderNav(){
     /* a 24-week grid was four rows of buttons before you reached the workout;
        long plans get a stepper, and they land on the right week by date anyway */
     wks.style.gridTemplateColumns = "56px 1fr 56px";
-    const step = (txt, to, dis, lab) => {
+    const stepBtn = (txt, to, dis, lab) => {
       const b = document.createElement("button");
       b.className = "wkbtn step"; b.type = "button"; b.textContent = txt;
       b.disabled = dis; b.setAttribute("aria-label", lab);
@@ -1928,8 +2299,8 @@ function renderNav(){
     const lab = document.createElement("div");
     lab.className = "wklab";
     lab.textContent = (PROG.id === "sheiko" && pos.w === 4 ? "Week 4 · deload" : "Week " + pos.w) + " of " + PROG.weeks;
-    wks.append(step("‹", Math.max(1, pos.w-1), pos.w <= 1, "Previous week"), lab,
-               step("›", Math.min(PROG.weeks, pos.w+1), pos.w >= PROG.weeks, "Next week"));
+    wks.append(stepBtn("‹", Math.max(1, pos.w-1), pos.w <= 1, "Previous week"), lab,
+               stepBtn("›", Math.min(PROG.weeks, pos.w+1), pos.w >= PROG.weeks, "Next week"));
   } else {
     wks.style.gridTemplateColumns = "repeat(" + Math.min(4, PROG.weeks) + ",1fr)";
     for(let w=1; w<=PROG.weeks; w++){
@@ -1957,6 +2328,11 @@ function renderNav(){
   }
 }
 
+/* Escaping rule for everything below: values that come from the USER — session
+   notes, coach log lines, program names restored from a backup — go through
+   esc() or land via .value/.textContent. Builder strings (labels, subs, block
+   names) are literals in this file and are interpolated raw. Keep it that way:
+   the day a builder interpolates free text, it needs esc() too. */
 function renderSession(){
   const pos = posOf(PROG.id), r = rec(PROG.id, pos.w, pos.d), built = PROG.build(pos.w, pos.d);
   BUILT = built;
@@ -1974,7 +2350,8 @@ function renderSession(){
   if(PROG.mixer){
     const pick = document.createElement("div");
     pick.className = "lift";
-    pick.innerHTML = '<div class="lift-head"><h2>Programs</h2><span>tap to include</span></div>';
+    pick.innerHTML = '<div class="lift-head"><h2>Programs</h2><span>add or remove mid-workout</span></div>' +
+      '<p class="blocknote">Change the mix whenever you like — ticks already done stay saved inside each program, even ones you take out.</p>';
     const grid = document.createElement("div");
     grid.className = "days";
     grid.style.gridTemplateColumns = "repeat(2,1fr)";
@@ -1987,7 +2364,19 @@ function renderSession(){
       btn.onclick = () => {
         S.mixSel = S.mixSel || [];
         const i = S.mixSel.indexOf(p.id);
-        if(i > -1) S.mixSel.splice(i,1); else S.mixSel.push(p.id);
+        if(i > -1){
+          /* taking out a program you already touched must never look like it
+             deleted the work — say where the ticks live, then let you decide */
+          const ppos = posOf(p.id), rr = rec(p.id, ppos.w, ppos.d);
+          const n = rr ? Object.keys(rr.sets).filter(k => rr.sets[k]).length : 0;
+          if((n > 0 || (rr && rr.done)) &&
+             !confirm(p.name + " already has " + (rr.done ? "a logged session" : n + " sets ticked") +
+               " today. Take it out of the mix? The work stays saved in the program itself.")) return;
+          S.mixSel.splice(i,1);
+        } else {
+          S.mixSel.push(p.id);
+          toast(p.name + " joins the workout below");
+        }
         save(); renderSession();
       };
       grid.appendChild(btn);
@@ -2010,14 +2399,23 @@ function renderSession(){
 
     if(b.kind === "acc"){
       b.items.forEach((a, ai) => {
+        /* keyed like the ticks — a bare item index collides the day a session
+           carries two accessory blocks (migration v4 re-keyed the old ones) */
+        const aid = bId + "-" + ai;
         const row = document.createElement("div"); row.className = "acc-row";
         const nm = document.createElement("div"); nm.className = "acc-name";
         nm.innerHTML = a.label + "<em>" + a.sub + "</em>";
         const inp = document.createElement("input");
         inp.type = "number"; inp.inputMode = "decimal"; inp.step = "1"; inp.placeholder = "—";
-        inp.value = rb.acc[ai] != null ? rb.acc[ai] : "";
+        inp.value = rb.acc[aid] != null ? rb.acc[aid] : "";
         inp.setAttribute("aria-label", a.label + " working weight in kilograms");
-        inp.onchange = () => { rb.acc[ai] = inp.value; save(); };
+        /* clearing the field must clear the value: an empty string stored here
+           kept an otherwise untouched record alive forever */
+        inp.onchange = () => {
+          const n = parseFloat(inp.value);
+          if(isFinite(n) && n > 0) rb.acc[aid] = n; else delete rb.acc[aid];
+          save();
+        };
         const u = document.createElement("span"); u.className = "unit"; u.textContent = "kg";
         row.append(nm, inp, u); wrapEl.appendChild(row);
       });
@@ -2065,13 +2463,29 @@ function renderSession(){
      a note saved against the mixer record could never be read back — hide it */
   el("sessNote").classList.toggle("hidden", !!PROG.mixer);
 
+  /* three states, three faces: training (Finish button), logged awaiting a
+     verdict (done panel + verdict buttons that say what they do), verdict
+     given (a settled line — the buttons never just vanish into a re-render) */
   const fb = el("fbBtns"); fb.innerHTML = "";
-  el("fbBox").classList.toggle("hidden", !r.done);
-  [["Too much",-1],["About right",0],["Too easy",1]].forEach(o => {
-    const b = document.createElement("button"); b.type = "button"; b.textContent = o[0];
-    b.onclick = () => feedback(o[1]);
+  el("fbBox").classList.toggle("hidden", PROG.mixer || !r.done);
+  [["Too much","next sessions −5%",-1],["About right","load holds",0],["Too easy","next sessions +2.5%",1]].forEach(o => {
+    const b = document.createElement("button"); b.type = "button";
+    b.innerHTML = o[0] + "<small>" + o[1] + "</small>";
+    b.onclick = () => feedback(o[2], null, true);   /* panel verdict = the session on screen, never the pend one */
     fb.appendChild(b);
   });
+  const ticked = Object.keys(r.sets).filter(k => r.sets[k]).length;
+  if(r.done){
+    el("doneSum").textContent = "Week " + pos.w + " · Day " + pos.d +
+      (ticked ? " · " + ticked + (ticked === 1 ? " set" : " sets") + " ticked" : "") + (r.dur ? " · " + hhmmss(r.dur) : "");
+    const settled = r.fb != null;
+    el("fbScale").classList.toggle("hidden", settled);
+    el("fbSettled").classList.toggle("hidden", !settled);
+    if(settled) el("fbSettled").textContent = "Your verdict: " + FBNAME[r.fb + 1] +
+      (r.fb ? (r.fbp != null ? " — scaled to " + r.fbp + "%" : " — a deload was active, so the scale held")
+            : " — load held") +
+      ". Already moved on to the next session.";
+  }
   /* RPE: what the session cost, which completion % can't say. Tap again to clear. */
   const rp = el("rpeBtns"); rp.innerHTML = "";
   for(let v=1; v<=10; v++){
@@ -2085,32 +2499,84 @@ function renderSession(){
     rp.appendChild(b);
   }
   el("fbLead").textContent = A(PROG.id) === 1
-    ? "How did that sit? Your answer scales the next sessions and moves you on."
-    : "Running at " + pctLabel(PROG.id) + " of the base plan. Answer to scale again and move on.";
+    ? "How did that sit? Your answer scales the next sessions."
+    : "Running at " + pctLabel(PROG.id) + " of the base plan. Answer to scale again.";
 
-  const pr = el("presets"); pr.innerHTML = "";
+  const pres = el("presets"); pres.innerHTML = "";
   [30,60,90,120,180].forEach(s => {
     const b = document.createElement("button"); b.type = "button";
     /* "1.5 min" overflowed a fifth of a 375px screen — seconds up to 90 */
     b.textContent = s < 120 ? s + " s" : (s/60) + " min";
     b.onclick = () => startTimer(s, "Rest");
-    pr.appendChild(b);
+    pres.appendChild(b);
   });
 
   if(PROG.mixer){
     const sel = S.mixSel || [];
+    /* "logged" means the ledger says so, not that the pointer happens to sit on
+       a done session — after advance() it never does, so this state was
+       unreachable and the button stayed live for an accidental second tap */
+    const md = mixLoggedToday();
     const allDone = sel.length > 0 && sel.every(id => {
+      if(md[id]) return true;
       const ppos = posOf(id), rr = S.log[slotKey(id, ppos.w, ppos.d)];
       return rr && rr.done;
     });
+    el("finishBtn").classList.remove("hidden");
+    el("finishBtn").classList.remove("go");
     el("finishBtn").textContent = allDone ? "All included sessions logged ✓" : "Log all included sessions";
   } else {
-    el("finishBtn").textContent = r.done ? "Session logged ✓ — tap to undo" : "Mark session complete";
+    el("finishBtn").textContent = "Finish session";
+    el("finishBtn").classList.toggle("hidden", !!r.done);
+    /* green once there's real work on the board: finishing reads as success,
+       not as yet another identical ink button */
+    el("finishBtn").classList.toggle("go", !r.done && ticked > 0);
+  }
+  /* orientation + pending verdict, out loud at the TOP: finishing moves the
+     program on, and the verdict for the session you just logged rides on the
+     next one until answered — no more "same day again tomorrow" */
+  const bn = el("sessBanner");
+  const pend = !PROG.mixer && S.pend ? S.pend[PROG.id] : null;
+  const pendHere = pend && pend.w === pos.w && pend.d === pos.d;
+  if(pend && !pendHere){
+    const pRec = rec(PROG.id, pend.w, pend.d);
+    if(!pRec.done || pRec.fb != null){ delete S.pend[PROG.id]; bn.className = "hidden"; bn.innerHTML = ""; }
+    else {
+      bn.className = "ok";
+      bn.innerHTML = "<b>Logged ✓ — Week " + pend.w + " · Day " + pend.d + "</b>" +
+        esc("How was it? Your answer scales what comes next — and you're already on Week " +
+            pos.w + " · Day " + pos.d + ".");
+      const vrow = document.createElement("div");
+      vrow.className = "presets fb3"; vrow.style.margin = "10px 0 0";
+      [["Too much","−5%",-1],["About right","hold",0],["Too easy","+2.5%",1]].forEach(o => {
+        const b = document.createElement("button"); b.type = "button";
+        b.innerHTML = o[0] + "<small>" + o[1] + "</small>";
+        b.onclick = () => feedback(o[2], PROG.id);
+        vrow.appendChild(b);
+      });
+      bn.appendChild(vrow);
+      bn.classList.remove("hidden");
+    }
+  } else if(!PROG.mixer && r.done){
+    bn.className = "";
+    /* records from an older backup can lack d0 — say "earlier", not "on undefined" */
+    bn.textContent = "Already logged " + (!r.d0 ? "earlier" : r.d0 === todayISO() ? "today" : "on " + r.d0) +
+      " — ticks still edit it, Undo below pulls it back.";
+    bn.classList.remove("hidden");
+  } else {
+    bn.className = "hidden"; bn.innerHTML = "";
   }
   renderClock();
 }
 
 /* ============ SET TICKS (delegated; surgical update, no full re-render) ============ */
+/* surgical ticks skip renderSession, so the Finish button's green has to be
+   refreshed by hand wherever sets change without a re-render */
+function refreshFinishGo(){
+  if(PROG.mixer) return;
+  const pos = posOf(PROG.id), r = rec(PROG.id, pos.w, pos.d);
+  el("finishBtn").classList.toggle("go", !r.done && Object.keys(r.sets).some(k => r.sets[k]));
+}
 el("session").addEventListener("click", e => {
   if(!BUILT || !PROG) return;
   const cnt = e.target && e.target.closest ? e.target.closest("button.cbtn") : null;
@@ -2132,7 +2598,7 @@ el("session").addEventListener("click", e => {
   r.reps[id] = {n:it.reps || 0, c:it.cnt || "", l:b.l || ""};
   btn.setAttribute("aria-pressed", "true");
   if(it.rest) startTimer(it.rest, "Rest · " + b.n);
-  save(); renderTally(); renderNav();
+  saveSoon(); renderTally(); renderNav(); refreshFinishGo();
 });
 
 /* + fills the lowest untouched slot, − clears the highest filled one, so a
@@ -2166,7 +2632,7 @@ function counterTap(cbtn){
   box.querySelector('[data-cnt="+"]').disabled = done >= n;
   const bar = box.parentNode.querySelector(".bar i");
   if(bar) bar.style.width = (done/n*100) + "%";
-  save(); renderTally(); renderNav();
+  saveSoon(); renderTally(); renderNav(); refreshFinishGo();
 }
 
 /* ============ SET EDITOR SHEET ============ */
@@ -2187,16 +2653,18 @@ function openSheet(b, it, r, id){
   el("shW").value = fr.w != null ? fr.w : (planW > 0 ? planW : "");
   el("shR").value = fr.n || it.reps || "";
   updPlates();
-  el("scrim").classList.remove("hidden"); el("sheet").classList.remove("hidden");
+  openModal(el("sheet"));
 }
-function closeSheet(){ SHEET = null; el("sheet").classList.add("hidden"); el("scrim").classList.add("hidden"); }
+function closeSheet(){ SHEET = null; closeModal(el("sheet")); }
 el("shW").oninput = updPlates;
 el("shSave").onclick = () => {
   if(!SHEET) return;
-  const w = parseFloat(el("shW").value), rp = parseInt(el("shR").value, 10);
+  const wRaw = el("shW").value.trim(), w = parseFloat(wRaw), rp = parseInt(el("shR").value, 10);
   SHEET.r.reps = SHEET.r.reps || {};
   const fr = SHEET.r.reps[SHEET.id] = SHEET.r.reps[SHEET.id] || {n:SHEET.it.reps || 0, c:SHEET.it.cnt || "", l:SHEET.b.l || ""};
-  if(w > 0) fr.w = w;
+  /* an emptied weight field means "I didn't weigh it" — clear the actual
+     rather than forcing the old value to live forever */
+  if(wRaw === "") delete fr.w; else if(w > 0) fr.w = w;
   if(rp > 0) fr.n = rp;
   closeSheet(); save(); renderSession(); toast("Set updated");
 };
@@ -2207,7 +2675,7 @@ el("shUntick").onclick = () => {
   closeSheet(); save(); renderSession();
 };
 el("shClose").onclick = closeSheet;
-el("scrim").onclick = closeSheet;
+el("scrim").onclick = () => { closeSheet(); closeTe(); };
 
 /* ============ PROGRESS ============ */
 /* series carry CSS variables, not hex, so the charts follow light and dark;
@@ -2278,7 +2746,9 @@ function swChartHTML(){
   Object.keys(S.log).forEach(k => {
     const r = S.log[k]; if(!r.reps) return;
     let n = 0;
-    Object.keys(r.reps).forEach(id => { if(r.reps[id].c === "sw") n += r.reps[id].n || 0; });
+    /* guarded like every other reader of r.reps: one null entry from a
+       hand-edited backup used to take the whole Progress page down with it */
+    Object.keys(r.reps).forEach(id => { const f = r.reps[id]; if(f && f.c === "sw") n += (+f.n) || 0; });
     if(!n) return;
     if(r.d0) per[r.d0] = (per[r.d0] || 0) + n; else undated += n;
   });
@@ -2443,9 +2913,13 @@ function renderCoach(){
       b.style.minHeight = "44px"; b.style.minWidth = "76px"; b.style.flex = "0 0 auto";
       b.textContent = a.act.label;
       /* adjBy returns 0 when the one-change-a-day guard or the 80–115% clamp
-         blocks the move — saying "Applied" anyway was a lie */
-      b.onclick = () => { const r = a.act.fn(); save(); renderCoach();
-        toast(r === 0 ? "Nothing changed — already adjusted today" : "Applied"); };
+         blocks the move — saying "Applied" anyway was a lie. So was "Applied"
+         for a move parked behind a deload: LASTMOVE says which happened. */
+      b.onclick = () => { LASTMOVE = null;
+        const r = a.act.fn(); save(); renderCoach();
+        toast(r === 0 ? "Nothing changed — already adjusted today"
+            : (LASTMOVE && LASTMOVE.deferred) ? "Set to " + LASTMOVE.pct + "% — starts when the deload ends"
+            : "Applied"); };
       row.appendChild(b);
     }
     host.appendChild(row);
@@ -2570,15 +3044,29 @@ el("finishBtn").onclick = () => {
     /* the mixer marks every included program's session done, one history line each */
     const sel = (S.mixSel || []).filter(id => { const p = progById(id); return p && !p.mixer; });
     if(!sel.length){ toast("Nothing selected yet"); return; }
+    const md = mixDay();
+    /* a second tap used to log the NEXT session of every program, because
+       advance() had already moved the pointer past the one just logged. The
+       ledger stops that; a genuine second workout today still gets through,
+       but only on purpose. */
+    let todo = sel.filter(id => !md.ids[id]);
+    if(!todo.length){
+      if(!confirm("Every included program was already logged from the mixer today.\n\nLog a second round on top?")) return;
+      md.ids = {}; todo = sel;
+    }
     let n = 0;
-    sel.forEach(id => {
+    todo.forEach(id => {
       const p = progById(id), ppos = posOf(id), rr = rec(id, ppos.w, ppos.d);
       if(rr.done) return;
       rr.done = true; rr.d0 = rr.d0 || todayISO(); n++;
+      md.ids[id] = {w:ppos.w, d:ppos.d};
       S.history.unshift({d:todayISO(), p:p.name, w:ppos.w, day:ppos.d, k:slotKey(id, ppos.w, ppos.d)});
+      /* mixer-logged programs advance too — the verdict waits on their own screen */
+      S.pend = S.pend || {}; S.pend[id] = {w:ppos.w, d:ppos.d};
+      advance(id);
     });
     S.history = S.history.slice(0,80);
-    toast(n ? "Logged " + n + (n === 1 ? " session" : " sessions") : "Already all logged");
+    toast(n ? "Logged " + n + (n === 1 ? " session" : " sessions") + " — each program moved on" : "Already all logged");
     save(); renderSession();
     if(n && ghCfg().auto) ghBackup(true);
     return;
@@ -2589,35 +3077,81 @@ el("finishBtn").onclick = () => {
     r.d0 = r.d0 || todayISO();
     S.history.unshift({d:todayISO(), p:PROG.name, w:pos.w, day:pos.d, k:slotKey(PROG.id,pos.w,pos.d)});
     S.history = S.history.slice(0,80);
-    toast("Logged · " + PROG.name);
+    /* move on NOW, not after a verdict nobody may tap — the verdict strip rides
+       on top of the next session until it's answered */
+    S.pend = S.pend || {}; S.pend[PROG.id] = {w:pos.w, d:pos.d};
+    const moved = advance(PROG.id);
+    toast("Logged · " + PROG.name + (moved ? " — on to the next session" : " — plan complete"));
   } else {
-    /* undo: drop the history line this session added, don't leave a duplicate */
+    /* undo: drop the history line this session added, don't leave a duplicate —
+       and clear verdict state so a re-finish asks for feedback fresh */
+    let rolled = false;
+    /* a verdict given TODAY is "I tapped the wrong thing": pull its scaling back
+       exactly (fba is the scale from before it). Older verdicts are history —
+       touching them would wipe any adjustments made since. Never clobber an
+       active deload: it owns adj until its own expiry. */
+    if(r.fba != null && r.fbd === todayISO() && !(S.deload && S.deload[PROG.id])){
+      if(Math.abs(r.fba - 1) > 0.001) S.adj[PROG.id] = r.fba; else delete S.adj[PROG.id];
+      if(S.coach && S.coach.today && S.coach.today.ids) delete S.coach.today.ids[PROG.id];
+      rolled = true;
+    }
+    delete r.fb; delete r.fbp; delete r.fba; delete r.fbd;
+    if(S.pend && S.pend[PROG.id] && S.pend[PROG.id].w === pos.w && S.pend[PROG.id].d === pos.d)
+      delete S.pend[PROG.id];
     const k = slotKey(PROG.id,pos.w,pos.d);
     const i = S.history.findIndex(x => x.k === k);
     if(i > -1) S.history.splice(i,1);
+    toast("Session pulled back" + (rolled ? " — scaling rolled back too" : ""));
   }
   save(); renderSession();
   if(r.done && ghCfg().auto) ghBackup(true);
 };
+/* the done panel's Undo runs the exact same toggle — one code path, two doors */
+el("undoBtn").onclick = () => el("finishBtn").onclick();
 
-/* advancing happens only after feedback, so the prompt is reachable */
-function advance(){
-  const pos = posOf(PROG.id);
-  if(pos.d < PROG.days) pos.d++;
-  else if(pos.w < PROG.weeks){ pos.w++; pos.d = 1; }
+/* finishing a session moves the program on immediately — the verdict scales
+   the future, it no longer gates it. The pointer sits in S.pend until answered. */
+function advance(id){
+  const p = progById(id), pos = posOf(id);
+  if(pos.d < p.days){ pos.d++; return true; }
+  if(pos.w < p.weeks){ pos.w++; pos.d = 1; return true; }
+  return false;
 }
 
-function feedback(v){
-  const id = PROG.id, now = A(id);
+const FBNAME = ["Too much", "About right", "Too easy"];
+
+function feedback(v, pid, cur){
+  const id = pid || PROG.id, now = A(id);
+  /* the strip's verdict belongs to the logged session it describes, which after
+     an auto-advance is behind the current pointer — S.pend remembers where.
+     The done panel's verdict instead describes the session ON SCREEN (cur) —
+     with an unanswered pend pointing elsewhere, it must not land there instead */
+  const pend = (S.pend || {})[id];
+  const pos = cur ? posOf(id) : (pend || posOf(id));
+  const r = rec(id, pos.w, pos.d);
+  /* a fast double-tap re-fires on the detached button — answered once, never twice */
+  if(!r.done || r.fb != null) return;
+  /* a declared deload owns the scale until it expires: a verdict given during
+     it would either corrupt the 85% now or be silently overwritten by prev at
+     expiry. Record the verdict, hold the scale — the undo path already
+     refuses to roll back across an active deload.
+     Deliberately unlike the coach, which parks its move in deload.prev: a
+     verdict judges ONE session, and an easy-week session says nothing about
+     what the normal week should weigh. The coach judges the trend. */
+  const dl = (S.deload || {})[id];
   /* your own verdict always applies (force), but it claims the day so the
      auto-pilot cannot stack a second change on the same program */
-  if(v !== 0) adjBy(id, v < 0 ? -0.05 : 0.025, true);
+  if(v !== 0 && !dl){ r.fba = A(id); r.fbd = todayISO(); adjBy(id, v < 0 ? -0.05 : 0.025, true); }
   const next = A(id);
-  advance();
+  r.fb = v; r.fbp = (v !== 0 && !dl) ? Math.round(next*100) : null;   /* the verdict stays on the record */
+  /* clear the strip only when it pointed at the session just answered — a panel
+     verdict for an older session must not steal another session's strip */
+  if(S.pend && pend && pend.w === pos.w && pend.d === pos.d) delete S.pend[id];
   save();
-  toast(v < 0 ? "Scaled back to " + Math.round(next*100) + "% — next session ready"
-      : v > 0 ? "Nudged up to " + Math.round(next*100) + "% — next session ready"
-              : "Held at " + Math.round(now*100) + "% — next session ready");
+  toast(v !== 0 && dl ? "Verdict noted — the deload holds the scale until " + dl.until
+      : v < 0 ? "Scaled back to " + Math.round(next*100) + "%"
+      : v > 0 ? "Nudged up to " + Math.round(next*100) + "%"
+              : "Held at " + Math.round(now*100) + "%");
   renderSession();
 }
 
@@ -2635,9 +3169,10 @@ el("settingsBtn").onclick = () => {
   el("sq2").value = S.oneRM.squat; el("bp2").value = S.oneRM.bench; el("dl2").value = S.oneRM.dl;
   el("kb2").value = S.kb; el("bag2").value = S.bag; el("row2").value = mmss(S.row2k); el("tgt2").value = S.target;
   el("run2").value = mmss(S.run5k); el("pu2").value = S.pmax; el("di2").value = S.dmax;
-  el("inc2").value = String(S.inc || 2.5);
+  el("inc2").value = String(S.inc) === "1.25" ? "1.25" : "2.5";   /* stored 5 kg from an older build folds to 2.5 */
   el("runStart").value = (S.start && S.start.run) || "";
   el("awakeSel").value = S.awake ? "1" : "0";
+  el("notifSel").value = S.notif ? "1" : "0";
   el("themeSel").value = S.theme || "system";
   el("ringSel").value = S.ring ? "1" : "0";
   el("ringName").value = S.ringName || "Rest Timer";
@@ -2691,14 +3226,30 @@ function estimate(){
 });
 el("resetAdj").onclick = () => { S.adj = {}; save(); toast("All programs back to 100%"); el("settingsBtn").onclick(); };
 el("awakeSel").onchange = () => { S.awake = el("awakeSel").value === "1"; save(); };
+el("notifSel").onchange = () => {
+  const want = el("notifSel").value === "1";
+  if(!want){ S.notif = false; save(); return; }
+  if(!("Notification" in window)){ toast("This browser can't show notifications — sound still plays"); el("notifSel").value = "0"; S.notif = false; save(); return; }
+  /* permission only sticks from a user gesture — this select is one */
+  Notification.requestPermission().then(p => {
+    if(p === "granted"){ S.notif = true; save(); toast("You'll get a notification when a rest ends"); }
+    else { el("notifSel").value = "0"; S.notif = false; save(); toast("Permission not given — sound + vibration still fire"); }
+  });
+};
 el("themeSel").onchange = () => { S.theme = el("themeSel").value; save(); applyTheme(); };
 el("ringSel").onchange = () => { S.ring = el("ringSel").value === "1"; save(); };
 el("ringName").onchange = () => { S.ringName = el("ringName").value.trim() || "Rest Timer"; save(); };
 el("ringTest").onclick = () => handoff(10);
 el("ghRepo").onchange = () => {
   /* accept a pasted URL and normalise it to owner/name */
-  ghCfg().repo = el("ghRepo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/\/+$/, "");
-  el("ghRepo").value = ghCfg().repo;
+  const v = el("ghRepo").value.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/i, "").replace(/\/+$/, "");
+  if(v && !ghValid(v)){
+    toast("A repo reads owner/name — “" + v + "” doesn't");
+    el("ghRepo").value = ghCfg().repo;
+    return;
+  }
+  ghCfg().repo = v;
+  el("ghRepo").value = v;
   save();
 };
 el("ghTok").onchange = () => { ghCfg().token = el("ghTok").value.trim(); save(); };
@@ -2750,16 +3301,25 @@ el("csvBtn").onclick = () => {
   Object.keys(S.log).forEach(k => {
     const parts = k.split("|"), id = parts[0], p = progById(id);
     if(!p) return;
-    let cyc = "", w, d;
-    if(id === "sheiko"){ cyc = parts[1].slice(1); w = +parts[2]; d = +parts[3]; }
-    else { w = +parts[1]; d = +parts[2]; }
+    /* week and day are the LAST two segments, as everywhere else in this file —
+       fixed indices read a cycle-less sheiko key as week 3, day NaN */
+    const w = +parts[parts.length-2], d = +parts[parts.length-1];
+    const cyc = (parts.length > 3 && /^c\d+$/.test(parts[1])) ? parts[1].slice(1) : "";
     const r = S.log[k];
     let built = null; try{ built = p.build(w, d); }catch(e){}
-    Object.keys(r.reps || {}).forEach(sid => {
-      const f = r.reps[sid], ix = sid.split("-");
+    /* records ticked before rep-freezing have sets and no reps — they used to
+       vanish from the CSV entirely. Fall back to the ticked set ids. */
+    const frozen = r.reps || {};
+    const sids = Object.keys(frozen).length
+      ? Object.keys(frozen)
+      : Object.keys(r.sets || {}).filter(x => r.sets[x]);
+    sids.forEach(sid => {
+      const f = frozen[sid] || {}, ix = sid.split("-");
       const blk = built && built.blocks[+ix[0]], it = blk && blk.items[+ix[1]];
+      const reps = f.n != null ? f.n : (it && it.reps != null ? it.reps : "");
+      const cnt  = f.c != null ? f.c : (it ? (it.cnt || "") : "");
       rows.push([r.d0 || "", p.name, cyc, w, d, blk ? blk.n : ix[0], it ? it.label : ix[1],
-                 f.n, f.w != null ? f.w : "", f.c, r.done ? 1 : 0, r.dur || "", r.note || "", r.rpe || ""]);
+                 reps, f.w != null ? f.w : "", cnt, r.done ? 1 : 0, r.dur || "", r.note || "", r.rpe || ""]);
     });
   });
   const blob = new Blob([rows.map(rr => rr.map(q).join(",")).join("\n")], {type:"text/csv"});
@@ -2795,13 +3355,14 @@ el("wipeBtn").onclick = () => {
 };
 
 /* pure helpers exposed for testing (osascript / console) */
-window.TH = {v:11, parseTime:parseTime, epley:epley, mmss:mmss, hhmmss:hhmmss, plates:plates, esc:esc, kgOf:kgOf,
+window.TH = {v:19, parseTime:parseTime, epley:epley, mmss:mmss, hhmmss:hhmmss, plates:plates, esc:esc, kgOf:kgOf,
   _blank:blank, _migrate:migrate, _setS:o => { S = o; }, _getS:() => S, _progs:PROGS,
   _build:(id,w,d) => progById(id).build(w,d), _weekNPL:weekNPL, _countAll:countAll,
   _export:exportJSON, _b64:b64utf8, _ghBackup:ghBackup, _ghRestore:ghRestore, _wkElapsed:wkElapsed,
   _sane:sane, _posOf:posOf, _adjBy:adjBy, _repetitive:repetitive, _countDone:countDone,
   _nextUp:nextUp, _nextUpLine:nextUpLine, _sheikoIntensity:sheikoIntensity, _dayIntensity:dayIntensity,
   _sessionLoad:sessionLoad, _loadStats:loadStats, _advice:buildAdvice, _coachAuto:coachAuto,
+  _mixDay:mixDay, _mixLogged:mixLoggedToday, _ghValid:ghValid, _saveFlush:saveFlush,
   _learnedMinutes:learnedMinutes, _estMinutes:estMinutes, _progCompletion:progCompletion, _bestE1RM:bestE1RM};
 
 /* ============ BOOT ============ */
